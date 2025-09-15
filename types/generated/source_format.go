@@ -8,6 +8,9 @@ import "reflect"
 
 // Schema for existing source test files (api_*.json) with current structure
 type SourceFormatJson []struct {
+	// JSON Schema reference for this test format
+	Schema string `json:"$schema" yaml:"$schema" mapstructure:"$schema"`
+
 	// Implementation behavior requirements (optional)
 	Behaviors []SourceFormatJsonElemBehaviorsElem `json:"behaviors,omitempty" yaml:"behaviors,omitempty" mapstructure:"behaviors,omitempty"`
 

@@ -7,8 +7,13 @@
   "minItems": 1,
   "items": {
     "type": "object",
-    "required": ["name", "input", "tests"],
+    "required": ["$schema", "name", "input", "tests"],
     "properties": {
+      "$schema": {
+        "type": "string",
+        "description": "JSON Schema reference for this test format",
+        "const": "ccl-test-current-source-format"
+      },
       "name": {
         "type": "string",
         "description": "Unique test name identifier",

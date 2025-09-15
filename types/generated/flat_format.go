@@ -8,6 +8,9 @@ import "reflect"
 
 // Schema for existing generated flat test files (*-flat.json)
 type GeneratedFormatJson []struct {
+	// JSON Schema reference for this test format
+	Schema string `json:"$schema" yaml:"$schema" mapstructure:"$schema"`
+
 	// Optional arguments for parameterized functions
 	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 

@@ -354,6 +354,7 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 
 // FlatTestCase is the element type of GeneratedFormatJson slice
 type FlatTestCase = struct {
+	Schema string `json:"$schema" yaml:"$schema" mapstructure:"$schema"`
 	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 	Behaviors []generated.GeneratedFormatJsonElemBehaviorsElem `json:"behaviors" yaml:"behaviors" mapstructure:"behaviors"`
 	Conflicts *generated.GeneratedFormatJsonElemConflicts `json:"conflicts,omitempty" yaml:"conflicts,omitempty" mapstructure:"conflicts,omitempty"`
@@ -383,6 +384,7 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) FlatTestCase {
 	functions := fg.convertFunctions(test.Functions)
 	
 	return FlatTestCase{
+		Schema:     "ccl-test-current-flat-format",
 		Name:       test.Name,
 		Input:      test.Input,
 		Validation: generated.GeneratedFormatJsonElemValidation(test.Validation),
