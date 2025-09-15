@@ -31,8 +31,8 @@ type LoadOptions struct {
 type TestFormat int
 
 const (
-	FormatSource TestFormat = iota // tests/*.json (maintainable)
-	FormatFlat                     // generated-tests/ (implementation-friendly)
+	FormatCompact TestFormat = iota // source_tests/*.json (compact arrays)
+	FormatFlat                      // generated-tests/ (implementation-friendly)
 )
 
 // FilterMode specifies how tests should be filtered
@@ -59,7 +59,7 @@ func (tl *TestLoader) LoadAllTests(opts LoadOptions) ([]types.TestCase, error) {
 	var pattern string
 
 	switch opts.Format {
-	case FormatSource:
+	case FormatCompact:
 		testDir = filepath.Join(tl.TestDataPath, "tests")
 		pattern = "*.json"
 	case FormatFlat:
@@ -95,27 +95,28 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 
 	var suite types.TestSuite
 	
-	// Handle flat format (array of TestCase) vs source format (TestSuite)
+	// Handle format detection
 	if opts.Format == FormatFlat {
-		// Try to parse as array of TestCase first (current ccl-test-data flat format)
+		// Flat format - array of TestCase (implementation-friendly)
 		var tests []types.TestCase
-		if err := json.Unmarshal(data, &tests); err == nil {
-			// Successfully parsed as array - create wrapper TestSuite
-			suite = types.TestSuite{
-				Suite:   "Generated Flat Format",
-				Version: "1.0",
-				Tests:   tests,
-			}
-		} else {
-			// Fall back to TestSuite format
-			if err := json.Unmarshal(data, &suite); err != nil {
-				return nil, fmt.Errorf("failed to parse JSON as both array and suite: %w", err)
-			}
+		if err := json.Unmarshal(data, &tests); err != nil {
+			return nil, fmt.Errorf("failed to parse flat format JSON: %w", err)
+		}
+		suite = types.TestSuite{
+			Suite:   "Flat Format",
+			Version: "1.0", 
+			Tests:   tests,
 		}
 	} else {
-		// Source format - always TestSuite
-		if err := json.Unmarshal(data, &suite); err != nil {
-			return nil, fmt.Errorf("failed to parse JSON: %w", err)
+		// Compact format - array of compact test objects
+		tests, err := tl.loadCompactFormat(data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse compact format: %w", err)
+		}
+		suite = types.TestSuite{
+			Suite:   "Compact Format",
+			Version: "1.0",
+			Tests:   tests,
 		}
 	}
 
@@ -402,4 +403,123 @@ type CapabilityCoverage struct {
 type CoverageInfo struct {
 	Available  int // Total tests available for this capability
 	Compatible int // Tests compatible with this implementation
+}
+
+// CompactTest represents a test in compact format (source_tests/ files)
+type CompactTest struct {
+	Name      string                `json:"name"`
+	Input     string                `json:"input"`
+	Tests     []CompactValidation   `json:"tests"`
+	Level     int                   `json:"level,omitempty"`
+	Features  []string              `json:"features,omitempty"`
+	Behaviors []string              `json:"behaviors,omitempty"`
+	Variants  []string              `json:"variants,omitempty"`
+	Conflicts *types.ConflictSet    `json:"conflicts,omitempty"`
+}
+
+// CompactValidation represents a single validation in compact format
+type CompactValidation struct {
+	Function string      `json:"function"`
+	Expect   interface{} `json:"expect"`
+	Args     []string    `json:"args,omitempty"`
+	Error    bool        `json:"error,omitempty"`
+}
+
+// loadCompactFormat parses compact format and converts to TestCase array
+func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
+	var compactTests []CompactTest
+	if err := json.Unmarshal(data, &compactTests); err != nil {
+		return nil, fmt.Errorf("failed to parse compact format JSON: %w", err)
+	}
+
+	var testCases []types.TestCase
+	for _, compact := range compactTests {
+		// Convert compact test to TestCase with validations
+		// Only set conflicts if they exist in the source data
+		var conflicts *types.ConflictSet
+		if compact.Conflicts != nil {
+			// Check if the ConflictSet has any actual conflicts
+			hasConflicts := len(compact.Conflicts.Functions) > 0 ||
+				len(compact.Conflicts.Behaviors) > 0 ||
+				len(compact.Conflicts.Variants) > 0 ||
+				len(compact.Conflicts.Features) > 0
+			if hasConflicts {
+				conflicts = compact.Conflicts
+			}
+		}
+
+		// Ensure all slice fields are never nil
+		features := compact.Features
+		if features == nil {
+			features = make([]string, 0)
+		}
+		behaviors := compact.Behaviors  
+		if behaviors == nil {
+			behaviors = make([]string, 0)
+		}
+		variants := compact.Variants
+		if variants == nil {
+			variants = make([]string, 0)
+		}
+
+		testCase := types.TestCase{
+			Name:      compact.Name,
+			Input:     compact.Input,
+			Features:  features,
+			Behaviors: behaviors,
+			Variants:  variants,
+			Conflicts: conflicts,
+			Meta: types.TestMetadata{
+				Level: compact.Level,
+			},
+		}
+
+		// Create ValidationSet from compact tests array
+		validations := &types.ValidationSet{}
+		
+		for _, test := range compact.Tests {
+			switch test.Function {
+			case "parse":
+				validations.Parse = test.Expect
+			case "parse_value":
+				validations.ParseValue = test.Expect
+			case "filter":
+				validations.Filter = test.Expect
+			case "combine":
+				validations.Combine = test.Expect
+			case "expand_dotted":
+				validations.ExpandDotted = test.Expect
+			case "build_hierarchy":
+				validations.BuildHierarchy = test.Expect
+			case "get_string":
+				validations.GetString = test.Expect
+			case "get_int":
+				validations.GetInt = test.Expect
+			case "get_bool":
+				validations.GetBool = test.Expect
+			case "get_float":
+				validations.GetFloat = test.Expect
+			case "get_list":
+				validations.GetList = test.Expect
+			case "pretty_print":
+				validations.PrettyPrint = test.Expect
+			case "round_trip":
+				validations.RoundTrip = test.Expect
+			case "associativity":
+				validations.Associativity = test.Expect
+			case "canonical_format":
+				validations.Canonical = test.Expect
+			}
+			
+			// Set args if present
+			if len(test.Args) > 0 {
+				testCase.Args = test.Args
+			}
+		}
+		
+		testCase.Validations = validations
+		testCases = append(testCases, testCase)
+	}
+
+	return testCases, nil
 }

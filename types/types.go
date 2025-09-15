@@ -29,9 +29,9 @@ type TestCase struct {
 
 	// Type-safe metadata (replaces string tag parsing)
 	Functions []string `json:"functions,omitempty"`
-	Features  []string `json:"features,omitempty"`
-	Behaviors []string `json:"behaviors,omitempty"`
-	Variants  []string `json:"variants,omitempty"`
+	Features  []string `json:"features"`
+	Behaviors []string `json:"behaviors"`
+	Variants  []string `json:"variants"`
 
 	// Conflict resolution
 	Conflicts *ConflictSet `json:"conflicts,omitempty"`
@@ -44,9 +44,10 @@ type TestCase struct {
 
 // ConflictSet provides structured conflict resolution
 type ConflictSet struct {
-	Behaviors []string `json:"behaviors,omitempty"`
-	Variants  []string `json:"variants,omitempty"`
-	Features  []string `json:"features,omitempty"`
+	Functions []string `json:"functions"`
+	Behaviors []string `json:"behaviors"`
+	Variants  []string `json:"variants"`
+	Features  []string `json:"features"`
 }
 
 // ValidationSet contains all possible validations (source format)
@@ -65,11 +66,13 @@ type ValidationSet struct {
 	PrettyPrint    interface{} `json:"pretty_print,omitempty"`
 	RoundTrip      interface{} `json:"round_trip,omitempty"`
 	Associativity  interface{} `json:"associativity,omitempty"`
+	Canonical      interface{} `json:"canonical_format,omitempty"`
 }
 
 // TestMetadata contains categorization and legacy tag support
 type TestMetadata struct {
 	Tags       []string `json:"tags,omitempty"` // Legacy support
+	Conflicts  []string `json:"conflicts,omitempty"`
 	Level      int      `json:"level"`
 	Feature    string   `json:"feature,omitempty"`
 	Difficulty string   `json:"difficulty,omitempty"`
@@ -95,4 +98,10 @@ type ConflictSummary struct {
 	ConflictsWith []string
 	TestCount     int
 	AssertCount   int
+}
+
+// Entry represents a key-value pair from CCL parsing
+type Entry struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

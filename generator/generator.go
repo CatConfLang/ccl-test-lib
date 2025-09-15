@@ -11,7 +11,15 @@ import (
 	"strings"
 
 	"github.com/tylerbu/ccl-test-lib/config"
+	"github.com/tylerbu/ccl-test-lib/loader"
 	"github.com/tylerbu/ccl-test-lib/types"
+	"github.com/tylerbu/ccl-test-lib/types/generated"
+)
+
+// Export format constants for convenience
+const (
+	FormatCompact = loader.FormatCompact
+	FormatFlat    = loader.FormatFlat
 )
 
 // FlatGenerator transforms source format to implementation-friendly flat format
@@ -27,6 +35,7 @@ type GenerateOptions struct {
 	SkipLevels       []int                    // Skip specific levels
 	SkipFunctions    []config.CCLFunction     // Skip specific functions
 	OnlyFunctions    []config.CCLFunction     // Generate only these functions
+	SourceFormat     loader.TestFormat        // Input format (compact or flat)
 	Verbose          bool                     // Enable verbose output
 }
 
@@ -76,15 +85,15 @@ func (fg *FlatGenerator) GenerateAll() error {
 
 // GenerateFile processes a single source file
 func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
-	// Load source test suite
-	data, err := os.ReadFile(sourceFile)
+	// Use loader to handle format detection and parsing
+	testLoader := loader.NewTestLoader("", config.ImplementationConfig{})
+	
+	sourceSuite, err := testLoader.LoadTestFile(sourceFile, loader.LoadOptions{
+		Format:     fg.Options.SourceFormat,
+		FilterMode: loader.FilterAll,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to read source file: %w", err)
-	}
-
-	var sourceSuite types.TestSuite
-	if err := json.Unmarshal(data, &sourceSuite); err != nil {
-		return fmt.Errorf("failed to parse source JSON: %w", err)
+		return fmt.Errorf("failed to load source file: %w", err)
 	}
 
 	// Transform to flat format
@@ -106,9 +115,16 @@ func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
 	// Apply filtering options
 	flatSuite.Tests = fg.applyFiltering(flatSuite.Tests)
 
+	// Convert to generated flat format types (array of flat test cases)
+	var flatTests generated.GeneratedFormatJson
+	for _, test := range flatSuite.Tests {
+		flatTest := fg.convertToFlatFormat(test)
+		flatTests = append(flatTests, flatTest)
+	}
+
 	// Write flat format file
 	outputFile := filepath.Join(fg.OutputDir, filepath.Base(sourceFile))
-	flatData, err := json.MarshalIndent(flatSuite, "", "  ")
+	flatData, err := json.MarshalIndent(flatTests, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal flat JSON: %w", err)
 	}
@@ -162,10 +178,30 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		// Extract and populate type-safe metadata
 		flatTest.Functions, flatTest.Features = fg.GenerateMetadataFromValidation(validationName)
 		
-		// Copy behaviors and variants from source
-		flatTest.Behaviors = sourceTest.Behaviors
-		flatTest.Variants = sourceTest.Variants
-		flatTest.Conflicts = sourceTest.Conflicts
+		// Copy behaviors and variants from source, ensuring never nil
+		if sourceTest.Behaviors != nil {
+			flatTest.Behaviors = sourceTest.Behaviors
+		} else {
+			flatTest.Behaviors = make([]string, 0)
+		}
+		if sourceTest.Variants != nil {
+			flatTest.Variants = sourceTest.Variants
+		} else {
+			flatTest.Variants = make([]string, 0)
+		}
+		
+		// Only set conflicts if they exist and are non-empty
+		if sourceTest.Conflicts != nil {
+			// Check if the ConflictSet has any actual conflicts
+			hasConflicts := len(sourceTest.Conflicts.Functions) > 0 ||
+				len(sourceTest.Conflicts.Behaviors) > 0 ||
+				len(sourceTest.Conflicts.Variants) > 0 ||
+				len(sourceTest.Conflicts.Features) > 0
+			if hasConflicts {
+				flatTest.Conflicts = sourceTest.Conflicts
+			}
+			// If no conflicts, leave flatTest.Conflicts as nil (omitted)
+		}
 
 		// Handle special validation types
 		switch validationName {
@@ -191,6 +227,9 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 func (fg *FlatGenerator) GenerateMetadataFromValidation(validationName string) (functions []string, features []string) {
 	// Map validation names to functions
 	functions = []string{validationName}
+
+	// Initialize features as empty slice, never nil
+	features = make([]string, 0)
 
 	// Map validation names to required features
 	switch validationName {
@@ -311,6 +350,131 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 	}
 
 	return nil
+}
+
+// FlatTestCase is the element type of GeneratedFormatJson slice
+type FlatTestCase = struct {
+	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
+	Behaviors []generated.GeneratedFormatJsonElemBehaviorsElem `json:"behaviors" yaml:"behaviors" mapstructure:"behaviors"`
+	Conflicts *generated.GeneratedFormatJsonElemConflicts `json:"conflicts,omitempty" yaml:"conflicts,omitempty" mapstructure:"conflicts,omitempty"`
+	ErrorType *string `json:"error_type,omitempty" yaml:"error_type,omitempty" mapstructure:"error_type,omitempty"`
+	ExpectError bool `json:"expect_error,omitempty" yaml:"expect_error,omitempty" mapstructure:"expect_error,omitempty"`
+	Expected generated.GeneratedFormatJsonElemExpected `json:"expected" yaml:"expected" mapstructure:"expected"`
+	Features []generated.GeneratedFormatJsonElemFeaturesElem `json:"features" yaml:"features" mapstructure:"features"`
+	Functions []generated.GeneratedFormatJsonElemFunctionsElem `json:"functions,omitempty" yaml:"functions,omitempty" mapstructure:"functions,omitempty"`
+	Input string `json:"input" yaml:"input" mapstructure:"input"`
+	Level *int `json:"level,omitempty" yaml:"level,omitempty" mapstructure:"level,omitempty"`
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	Requires []string `json:"requires,omitempty" yaml:"requires,omitempty" mapstructure:"requires,omitempty"`
+	SourceTest *string `json:"source_test,omitempty" yaml:"source_test,omitempty" mapstructure:"source_test,omitempty"`
+	Validation generated.GeneratedFormatJsonElemValidation `json:"validation" yaml:"validation" mapstructure:"validation"`
+	Variants []generated.GeneratedFormatJsonElemVariantsElem `json:"variants" yaml:"variants" mapstructure:"variants"`
+}
+
+// convertToFlatFormat converts old TestCase to generated flat format with proper Expected structure
+func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) FlatTestCase {
+	// Create the proper Expected structure based on validation type
+	expected := fg.createExpectedStructure(test.Validation, test.Expected)
+	
+	// Convert behaviors, features, variants to the generated enum types
+	behaviors := fg.convertBehaviors(test.Behaviors)
+	features := fg.convertFeatures(test.Features)
+	variants := fg.convertVariants(test.Variants)
+	functions := fg.convertFunctions(test.Functions)
+	
+	return FlatTestCase{
+		Name:       test.Name,
+		Input:      test.Input,
+		Validation: generated.GeneratedFormatJsonElemValidation(test.Validation),
+		Expected:   expected,
+		Functions:  functions,
+		Features:   features,
+		Behaviors:  behaviors,
+		Variants:   variants,
+		Args:       test.Args,
+		SourceTest: &test.SourceTest,
+		Level:      &test.Meta.Level,
+	}
+}
+
+// createExpectedStructure creates the proper Expected object with Count and data fields
+func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.GeneratedFormatJsonElemExpected {
+	expected := generated.GeneratedFormatJsonElemExpected{}
+	
+	switch validation {
+	case "parse", "parse_value", "filter", "compose", "expand_dotted":
+		// These validations expect entries (key-value pairs)
+		if entries, ok := data.([]interface{}); ok {
+			expected.Count = len(entries)
+			var entryList []generated.GeneratedFormatJsonElemExpectedEntriesElem
+			for _, entry := range entries {
+				if entryMap, ok := entry.(map[string]interface{}); ok {
+					if key, hasKey := entryMap["key"].(string); hasKey {
+						if value, hasValue := entryMap["value"].(string); hasValue {
+							entryList = append(entryList, generated.GeneratedFormatJsonElemExpectedEntriesElem{
+								Key:   key,
+								Value: value,
+							})
+						}
+					}
+				}
+			}
+			expected.Entries = entryList
+		}
+	case "build_hierarchy":
+		// Hierarchy expects an object
+		expected.Count = 1
+		expected.Object = data
+	case "get_string", "get_int", "get_bool", "get_float":
+		// Typed access expects a single value
+		expected.Count = 1
+		expected.Value = data
+	case "get_list":
+		// List access expects a list
+		if list, ok := data.([]interface{}); ok {
+			expected.Count = len(list)
+			expected.List = list
+		}
+	default:
+		// Default case - try to infer from data type
+		expected.Count = 1
+		expected.Value = data
+	}
+	
+	return expected
+}
+
+// Helper functions for converting enum types
+func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.GeneratedFormatJsonElemBehaviorsElem {
+	var result []generated.GeneratedFormatJsonElemBehaviorsElem
+	for _, b := range behaviors {
+		result = append(result, generated.GeneratedFormatJsonElemBehaviorsElem(b))
+	}
+	return result
+}
+
+func (fg *FlatGenerator) convertFeatures(features []string) []generated.GeneratedFormatJsonElemFeaturesElem {
+	var result []generated.GeneratedFormatJsonElemFeaturesElem
+	for _, f := range features {
+		result = append(result, generated.GeneratedFormatJsonElemFeaturesElem(f))
+	}
+	return result
+}
+
+func (fg *FlatGenerator) convertVariants(variants []string) []generated.GeneratedFormatJsonElemVariantsElem {
+	var result []generated.GeneratedFormatJsonElemVariantsElem
+	for _, v := range variants {
+		result = append(result, generated.GeneratedFormatJsonElemVariantsElem(v))
+	}
+	return result
+}
+
+func (fg *FlatGenerator) convertFunctions(functions []string) []generated.GeneratedFormatJsonElemFunctionsElem {
+	var result []generated.GeneratedFormatJsonElemFunctionsElem
+	for _, f := range functions {
+		result = append(result, generated.GeneratedFormatJsonElemFunctionsElem(f))
+	}
+	return result
 }
 
 // Helper functions
