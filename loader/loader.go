@@ -478,42 +478,40 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 		validations := &types.ValidationSet{}
 		
 		for _, test := range compact.Tests {
+			// Create validation object with expect and args fields if present
+			validationValue := createValidationObject(test)
+
 			switch test.Function {
 			case "parse":
-				validations.Parse = test.Expect
+				validations.Parse = validationValue
 			case "parse_value":
-				validations.ParseValue = test.Expect
+				validations.ParseValue = validationValue
 			case "filter":
-				validations.Filter = test.Expect
+				validations.Filter = validationValue
 			case "combine":
-				validations.Combine = test.Expect
+				validations.Combine = validationValue
 			case "expand_dotted":
-				validations.ExpandDotted = test.Expect
+				validations.ExpandDotted = validationValue
 			case "build_hierarchy":
-				validations.BuildHierarchy = test.Expect
+				validations.BuildHierarchy = validationValue
 			case "get_string":
-				validations.GetString = test.Expect
+				validations.GetString = validationValue
 			case "get_int":
-				validations.GetInt = test.Expect
+				validations.GetInt = validationValue
 			case "get_bool":
-				validations.GetBool = test.Expect
+				validations.GetBool = validationValue
 			case "get_float":
-				validations.GetFloat = test.Expect
+				validations.GetFloat = validationValue
 			case "get_list":
-				validations.GetList = test.Expect
+				validations.GetList = validationValue
 			case "pretty_print":
-				validations.PrettyPrint = test.Expect
+				validations.PrettyPrint = validationValue
 			case "round_trip":
-				validations.RoundTrip = test.Expect
+				validations.RoundTrip = validationValue
 			case "associativity":
-				validations.Associativity = test.Expect
+				validations.Associativity = validationValue
 			case "canonical_format":
-				validations.Canonical = test.Expect
-			}
-			
-			// Set args if present
-			if len(test.Args) > 0 {
-				testCase.Args = test.Args
+				validations.Canonical = validationValue
 			}
 		}
 		
@@ -522,4 +520,27 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 	}
 
 	return testCases, nil
+}
+
+// createValidationObject creates a validation object that preserves both expect and args fields
+func createValidationObject(test CompactValidation) interface{} {
+	// Only typed access functions need args field
+	typedAccessFunctions := map[string]bool{
+		"get_string": true,
+		"get_int":    true,
+		"get_bool":   true,
+		"get_float":  true,
+		"get_list":   true,
+	}
+
+	validationObj := map[string]interface{}{
+		"expect": test.Expect,
+	}
+
+	// Only include args for typed access functions
+	if typedAccessFunctions[test.Function] {
+		validationObj["args"] = test.Args
+	}
+
+	return validationObj
 }

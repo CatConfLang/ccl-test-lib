@@ -116,15 +116,21 @@ func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
 	flatSuite.Tests = fg.applyFiltering(flatSuite.Tests)
 
 	// Convert to generated flat format types (array of flat test cases)
-	var flatTests generated.GeneratedFormatJson
+	var flatTests []generated.TestItem
 	for _, test := range flatSuite.Tests {
 		flatTest := fg.convertToFlatFormat(test)
 		flatTests = append(flatTests, flatTest)
 	}
 
+	// Create object format with $schema at top level
+	wrapper := generated.GeneratedFormatJson{
+		Schema: "http://json-schema.org/draft-07/schema#",
+		Tests:  flatTests,
+	}
+
 	// Write flat format file
 	outputFile := filepath.Join(fg.OutputDir, filepath.Base(sourceFile))
-	flatData, err := json.MarshalIndent(flatTests, "", "  ")
+	flatData, err := json.MarshalIndent(wrapper, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal flat JSON: %w", err)
 	}
@@ -158,9 +164,11 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 			continue // Skip nil validations
 		}
 
-		validationName := strings.ToLower(fieldType.Name)
-		// Convert CamelCase to snake_case
-		validationName = camelToSnake(validationName)
+		// Use JSON tag if available, otherwise convert field name
+		validationName := getValidationName(fieldType)
+
+		// Parse the validation value to extract components (args, expect, error)
+		validationComponents := parseValidationValue(field.Interface())
 
 		// Create flat test for this validation
 		flatTest := types.TestCase{
@@ -170,7 +178,9 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 			Input2:     sourceTest.Input2,
 			Input3:     sourceTest.Input3,
 			Validation: validationName,
-			Expected:   field.Interface(),
+			Expected:   validationComponents.Expected,
+			Args:       validationComponents.Args,
+			ExpectError: validationComponents.Error,
 			Meta:       sourceTest.Meta,
 			SourceTest: sourceTest.Name,
 		}
@@ -203,19 +213,8 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 			// If no conflicts, leave flatTest.Conflicts as nil (omitted)
 		}
 
-		// Handle special validation types
-		switch validationName {
-		case "parse_value":
-			// parse_value tests may have args
-			if sourceTest.Args != nil {
-				flatTest.Args = sourceTest.Args
-			}
-		}
-
-		// Check for error expectations in the validation value
-		if expectErrorFromValue(field.Interface()) {
-			flatTest.ExpectError = true
-		}
+		// Validation components are already parsed and applied above
+		// No special case handling needed - all validation types are handled uniformly
 
 		flatTests = append(flatTests, flatTest)
 	}
@@ -352,68 +351,105 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 	return nil
 }
 
-// FlatTestCase is the element type of GeneratedFormatJson slice
-type FlatTestCase = struct {
-	Schema string `json:"$schema" yaml:"$schema" mapstructure:"$schema"`
-	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
-	Behaviors []generated.GeneratedFormatJsonElemBehaviorsElem `json:"behaviors" yaml:"behaviors" mapstructure:"behaviors"`
-	Conflicts *generated.GeneratedFormatJsonElemConflicts `json:"conflicts,omitempty" yaml:"conflicts,omitempty" mapstructure:"conflicts,omitempty"`
-	ErrorType *string `json:"error_type,omitempty" yaml:"error_type,omitempty" mapstructure:"error_type,omitempty"`
-	ExpectError bool `json:"expect_error,omitempty" yaml:"expect_error,omitempty" mapstructure:"expect_error,omitempty"`
-	Expected generated.GeneratedFormatJsonElemExpected `json:"expected" yaml:"expected" mapstructure:"expected"`
-	Features []generated.GeneratedFormatJsonElemFeaturesElem `json:"features" yaml:"features" mapstructure:"features"`
-	Functions []generated.GeneratedFormatJsonElemFunctionsElem `json:"functions,omitempty" yaml:"functions,omitempty" mapstructure:"functions,omitempty"`
-	Input string `json:"input" yaml:"input" mapstructure:"input"`
-	Level *int `json:"level,omitempty" yaml:"level,omitempty" mapstructure:"level,omitempty"`
-	Name string `json:"name" yaml:"name" mapstructure:"name"`
-	Requires []string `json:"requires,omitempty" yaml:"requires,omitempty" mapstructure:"requires,omitempty"`
-	SourceTest *string `json:"source_test,omitempty" yaml:"source_test,omitempty" mapstructure:"source_test,omitempty"`
-	Validation generated.GeneratedFormatJsonElemValidation `json:"validation" yaml:"validation" mapstructure:"validation"`
-	Variants []generated.GeneratedFormatJsonElemVariantsElem `json:"variants" yaml:"variants" mapstructure:"variants"`
-}
 
 // convertToFlatFormat converts old TestCase to generated flat format with proper Expected structure
-func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) FlatTestCase {
+func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.TestItem {
 	// Create the proper Expected structure based on validation type
 	expected := fg.createExpectedStructure(test.Validation, test.Expected)
 	
 	// Convert behaviors, features, variants to the generated enum types
-	behaviors := fg.convertBehaviors(test.Behaviors)
-	features := fg.convertFeatures(test.Features)
-	variants := fg.convertVariants(test.Variants)
-	functions := fg.convertFunctions(test.Functions)
+	// Ensure these are never nil - initialize as empty if needed
+	testBehaviors := test.Behaviors
+	if testBehaviors == nil {
+		testBehaviors = make([]string, 0)
+	}
+	testFeatures := test.Features
+	if testFeatures == nil {
+		testFeatures = make([]string, 0)
+	}
+	testVariants := test.Variants
+	if testVariants == nil {
+		testVariants = make([]string, 0)
+	}
+	testFunctions := test.Functions
+	if testFunctions == nil {
+		testFunctions = make([]string, 0)
+	}
 	
-	return FlatTestCase{
-		Schema:     "ccl-test-current-flat-format",
+	behaviors := fg.convertBehaviors(testBehaviors)
+	features := fg.convertFeatures(testFeatures)
+	variants := fg.convertVariants(testVariants)
+	functions := fg.convertFunctions(testFunctions)
+	
+	// Create a concrete struct that implements TestItem interface
+	flatTest := struct {
+		Args []string `json:"args,omitempty"`
+		Behaviors []generated.TestItemBehaviorsElem `json:"behaviors"`
+		Conflicts *generated.TestItemConflicts `json:"conflicts,omitempty"`
+		ErrorType *string `json:"error_type,omitempty"`
+		ExpectError bool `json:"expect_error,omitempty"`
+		Expected generated.TestItemExpected `json:"expected"`
+		Features []generated.TestItemFeaturesElem `json:"features"`
+		Functions []generated.TestItemFunctionsElem `json:"functions,omitempty"`
+		Input string `json:"input"`
+		Level *int `json:"level,omitempty"`
+		Name string `json:"name"`
+		Requires []string `json:"requires,omitempty"`
+		SourceTest *string `json:"source_test,omitempty"`
+		Validation generated.TestItemValidation `json:"validation"`
+		Variants []generated.TestItemVariantsElem `json:"variants"`
+	}{
 		Name:       test.Name,
 		Input:      test.Input,
-		Validation: generated.GeneratedFormatJsonElemValidation(test.Validation),
+		Validation: generated.TestItemValidation(test.Validation),
 		Expected:   expected,
 		Functions:  functions,
 		Features:   features,
 		Behaviors:  behaviors,
 		Variants:   variants,
-		Args:       test.Args,
+		Args:       fg.getArgsForValidation(test.Validation, test.Args),
 		SourceTest: &test.SourceTest,
 		Level:      &test.Meta.Level,
 	}
+
+	return flatTest
+}
+
+// getArgsForValidation returns args only for typed access functions, nil for others
+func (fg *FlatGenerator) getArgsForValidation(validation string, args []string) []string {
+	// Only typed access functions need args field
+	typedAccessFunctions := map[string]bool{
+		"get_string": true,
+		"get_int":    true,
+		"get_bool":   true,
+		"get_float":  true,
+		"get_list":   true,
+	}
+
+	if typedAccessFunctions[validation] {
+		// For typed access functions, return args (even if empty)
+		return args
+	}
+
+	// For other functions, return nil so omitempty will omit the field
+	return nil
 }
 
 // createExpectedStructure creates the proper Expected object with Count and data fields
-func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.GeneratedFormatJsonElemExpected {
-	expected := generated.GeneratedFormatJsonElemExpected{}
+func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.TestItemExpected {
+	expected := generated.TestItemExpected{}
 	
 	switch validation {
 	case "parse", "parse_value", "filter", "compose", "expand_dotted":
 		// These validations expect entries (key-value pairs)
 		if entries, ok := data.([]interface{}); ok {
 			expected.Count = len(entries)
-			var entryList []generated.GeneratedFormatJsonElemExpectedEntriesElem
+			var entryList []generated.TestItemExpectedEntriesElem
 			for _, entry := range entries {
 				if entryMap, ok := entry.(map[string]interface{}); ok {
 					if key, hasKey := entryMap["key"].(string); hasKey {
 						if value, hasValue := entryMap["value"].(string); hasValue {
-							entryList = append(entryList, generated.GeneratedFormatJsonElemExpectedEntriesElem{
+							entryList = append(entryList, generated.TestItemExpectedEntriesElem{
 								Key:   key,
 								Value: value,
 							})
@@ -447,39 +483,53 @@ func (fg *FlatGenerator) createExpectedStructure(validation string, data interfa
 }
 
 // Helper functions for converting enum types
-func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.GeneratedFormatJsonElemBehaviorsElem {
-	var result []generated.GeneratedFormatJsonElemBehaviorsElem
+func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.TestItemBehaviorsElem {
+	result := make([]generated.TestItemBehaviorsElem, 0, len(behaviors))
 	for _, b := range behaviors {
-		result = append(result, generated.GeneratedFormatJsonElemBehaviorsElem(b))
+		result = append(result, generated.TestItemBehaviorsElem(b))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFeatures(features []string) []generated.GeneratedFormatJsonElemFeaturesElem {
-	var result []generated.GeneratedFormatJsonElemFeaturesElem
+func (fg *FlatGenerator) convertFeatures(features []string) []generated.TestItemFeaturesElem {
+	result := make([]generated.TestItemFeaturesElem, 0, len(features))
 	for _, f := range features {
-		result = append(result, generated.GeneratedFormatJsonElemFeaturesElem(f))
+		result = append(result, generated.TestItemFeaturesElem(f))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertVariants(variants []string) []generated.GeneratedFormatJsonElemVariantsElem {
-	var result []generated.GeneratedFormatJsonElemVariantsElem
+func (fg *FlatGenerator) convertVariants(variants []string) []generated.TestItemVariantsElem {
+	result := make([]generated.TestItemVariantsElem, 0, len(variants))
 	for _, v := range variants {
-		result = append(result, generated.GeneratedFormatJsonElemVariantsElem(v))
+		result = append(result, generated.TestItemVariantsElem(v))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFunctions(functions []string) []generated.GeneratedFormatJsonElemFunctionsElem {
-	var result []generated.GeneratedFormatJsonElemFunctionsElem
+func (fg *FlatGenerator) convertFunctions(functions []string) []generated.TestItemFunctionsElem {
+	result := make([]generated.TestItemFunctionsElem, 0, len(functions))
 	for _, f := range functions {
-		result = append(result, generated.GeneratedFormatJsonElemFunctionsElem(f))
+		result = append(result, generated.TestItemFunctionsElem(f))
 	}
 	return result
 }
 
 // Helper functions
+
+// getValidationName extracts the validation name from JSON tag or field name
+func getValidationName(fieldType reflect.StructField) string {
+	// Check for JSON tag first
+	if jsonTag := fieldType.Tag.Get("json"); jsonTag != "" {
+		// Remove ",omitempty" suffix if present
+		if idx := strings.Index(jsonTag, ","); idx != -1 {
+			return jsonTag[:idx]
+		}
+		return jsonTag
+	}
+	// Fallback to camelToSnake conversion of field name
+	return camelToSnake(fieldType.Name)
+}
 
 // camelToSnake converts CamelCase to snake_case
 func camelToSnake(s string) string {
@@ -491,6 +541,61 @@ func camelToSnake(s string) string {
 		result = append(result, r)
 	}
 	return strings.ToLower(string(result))
+}
+
+// ValidationComponents represents the parsed components of a validation value
+type ValidationComponents struct {
+	Expected interface{}
+	Args     []string
+	Error    bool
+}
+
+// parseValidationValue parses a validation value that may be either:
+// - A simple expected value (legacy format)
+// - A structured validation object with args, expect, error fields (source format)
+func parseValidationValue(value interface{}) ValidationComponents {
+	// Try to parse as structured validation object first
+	if validationMap, ok := value.(map[string]interface{}); ok {
+		result := ValidationComponents{
+			Expected: value, // Default to the whole object
+			Args:     []string{},
+			Error:    false,
+		}
+
+		// Extract expect field if present
+		if expect, hasExpect := validationMap["expect"]; hasExpect {
+			result.Expected = expect
+		}
+
+		// Extract args field if present
+		if argsInterface, hasArgs := validationMap["args"]; hasArgs {
+			if argsSlice, ok := argsInterface.([]interface{}); ok {
+				for _, arg := range argsSlice {
+					if argStr, ok := arg.(string); ok {
+						result.Args = append(result.Args, argStr)
+					}
+				}
+			} else if argsStringSlice, ok := argsInterface.([]string); ok {
+				result.Args = argsStringSlice
+			}
+		}
+
+		// Extract error field if present
+		if errorVal, hasError := validationMap["error"]; hasError {
+			if errorBool, ok := errorVal.(bool); ok {
+				result.Error = errorBool
+			}
+		}
+
+		return result
+	}
+
+	// Fallback to treating value as expected result (legacy format)
+	return ValidationComponents{
+		Expected: value,
+		Args:     []string{},
+		Error:    expectErrorFromValue(value),
+	}
 }
 
 // expectErrorFromValue checks if a validation value indicates an error expectation

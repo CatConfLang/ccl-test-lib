@@ -3,17 +3,41 @@
   "$id": "ccl-test-current-flat-format",
   "title": "CCL Test Current Flat Format",
   "description": "Schema for existing generated flat test files (*-flat.json)",
-  "type": "array",
-  "minItems": 1,
-  "items": {
-    "type": "object",
-    "required": ["$schema", "name", "input", "validation", "expected", "behaviors", "variants", "features"],
+  "type": "object",
+  "required": ["$schema", "tests"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/TestItem"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "TestItem": {
+      "type": "object",
+      "required": ["name", "input", "validation", "expected", "behaviors", "variants", "features"],
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "validation": {
+              "enum": ["get_string", "get_int", "get_bool", "get_float", "get_list"]
+            }
+          }
+        },
+        "then": {
+          "required": ["args"]
+        }
+      }
+    ],
     "properties": {
-      "$schema": {
-        "type": "string",
-        "description": "JSON Schema reference for this test format",
-        "const": "ccl-test-current-flat-format"
-      },
       "name": {
         "type": "string",
         "description": "Unique test name (source_name + validation function)",
@@ -29,7 +53,7 @@
         "enum": [
           "parse", "parse_value", "filter", "compose", "expand_dotted",
           "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-          "pretty_print", "load", "round_trip", "canonical_format", "associativity"
+          "canonical_format", "load", "round_trip", "associativity"
         ]
       },
       "expected": {
@@ -75,7 +99,7 @@
       },
       "args": {
         "type": "array",
-        "description": "Optional arguments for parameterized functions",
+        "description": "Arguments for typed access functions (get_string, get_int, get_bool, get_float, get_list). Required for these functions, omitted for others.",
         "items": {
           "type": "string"
         }
@@ -88,7 +112,7 @@
           "enum": [
             "parse", "parse_value", "filter", "compose", "expand_dotted",
             "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-            "pretty_print", "load", "canonical_format", "round_trip", "associativity"
+            "canonical_format", "load", "round_trip", "associativity"
           ]
         }
       },
@@ -179,5 +203,6 @@
       }
     },
     "additionalProperties": false
+    }
   }
 }
