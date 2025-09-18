@@ -29,7 +29,7 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create comprehensive test suite similar to ccl-test-data
@@ -332,7 +332,7 @@ func TestWorkflow_TestDataMaintenance(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 	backupDir := filepath.Join(tmpDir, "backup")
 
 	for _, dir := range []string{sourceDir, generatedDir, backupDir} {
@@ -509,7 +509,7 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create shared test data

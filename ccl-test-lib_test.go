@@ -29,12 +29,12 @@ func setupIntegrationTestData(t *testing.T) string {
 
 	// Create test directories
 	testsDir := filepath.Join(tmpDir, "tests")
-	generatedDir := filepath.Join(tmpDir, "generated-tests")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 	if err := os.MkdirAll(testsDir, 0755); err != nil {
 		t.Fatalf("Failed to create tests directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated-tests directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create compact format test data
@@ -125,7 +125,13 @@ func setupIntegrationTestData(t *testing.T) string {
 		},
 	}
 
-	flatData, _ := json.MarshalIndent(flatTests, "", "  ")
+	// Wrap flat tests in object format like real ccl-test-data files
+	flatSuite := types.TestSuite{
+		Suite:   "Integration Test Suite",
+		Version: "1.0",
+		Tests:   flatTests,
+	}
+	flatData, _ := json.MarshalIndent(flatSuite, "", "  ")
 	if err := os.WriteFile(filepath.Join(generatedDir, "integration.json"), flatData, 0644); err != nil {
 		t.Fatalf("Failed to write flat test file: %v", err)
 	}

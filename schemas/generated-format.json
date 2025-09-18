@@ -14,15 +14,8 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "$ref": "#/definitions/TestItem"
-      }
-    }
-  },
-  "additionalProperties": false,
-  "definitions": {
-    "TestItem": {
-      "type": "object",
-      "required": ["name", "input", "validation", "expected", "behaviors", "variants", "features"],
+    "type": "object",
+    "required": ["name", "input", "validation", "expected", "behaviors", "variants", "features"],
     "allOf": [
       {
         "if": {
@@ -203,6 +196,8 @@
       }
     },
     "additionalProperties": false
+      }
     }
-  }
+  },
+  "additionalProperties": false
 }

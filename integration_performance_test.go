@@ -24,13 +24,13 @@ func TestIntegration_LargeDatasetPerformance(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create large dataset (1000 source tests, each with 5 validations = 5000 flat tests)
@@ -194,13 +194,13 @@ func TestIntegration_MemoryUsagePattern(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create tests with large string content to test memory handling
@@ -294,13 +294,13 @@ func TestIntegration_MemoryUsagePattern(t *testing.T) {
 func TestIntegration_ConcurrentOperations(t *testing.T) {
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create test data
@@ -431,7 +431,7 @@ func TestIntegration_MixedFormatHandling(t *testing.T) {
 		t.Fatalf("Failed to create tests directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create compact format data

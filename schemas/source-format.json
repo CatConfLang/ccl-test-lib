@@ -1,175 +1,183 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "ccl-test-current-source-format",
-  "title": "CCL Test Current Source Format",
-  "description": "Schema for existing source test files (api_*.json) with current structure",
-  "type": "array",
-  "minItems": 1,
-  "items": {
-    "type": "object",
-    "required": ["$schema", "name", "input", "tests"],
-    "properties": {
-      "$schema": {
-        "type": "string",
-        "description": "JSON Schema reference for this test format",
-        "const": "ccl-test-current-source-format"
-      },
-      "name": {
-        "type": "string",
-        "description": "Unique test name identifier",
-        "pattern": "^[a-zA-Z0-9_]+$"
-      },
-      "input": {
-        "type": "string",
-        "description": "CCL input text to be tested"
-      },
-      "tests": {
-        "type": "array",
-        "description": "Array of test validations",
-        "minItems": 1,
-        "items": {
-          "type": "object",
-          "required": ["function", "expect"],
-          "properties": {
-            "function": {
-              "type": "string",
-              "description": "CCL function to test",
-              "enum": [
-                "parse", "parse_value", "filter", "compose", "expand_dotted",
-                "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-                "pretty_print", "load", "round_trip", "canonical_format", "associativity"
-              ]
-            },
-            "expect": {
-              "description": "Expected result from the function",
-              "oneOf": [
-                {
-                  "type": "array",
-                  "description": "Array of key-value entries for parse functions OR array of strings for list functions",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "required": ["key", "value"],
-                        "properties": {
-                          "key": {"type": "string"},
-                          "value": {"type": "string"}
-                        },
-                        "additionalProperties": false
-                      },
-                      {
-                        "type": "string"
+  "$id": "ccl-test-source-format-with-schema",
+  "title": "CCL Test Source Format with Schema Support",
+  "description": "Schema for source test files (api_*.json) with $schema field support",
+  "type": "object",
+  "required": ["tests"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference",
+      "format": "uri"
+    },
+    "tests": {
+      "type": "array",
+      "description": "Array of test cases",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "input", "tests"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique test name identifier",
+            "pattern": "^[a-zA-Z0-9_]+$"
+          },
+          "input": {
+            "type": "string",
+            "description": "CCL input text to be tested"
+          },
+          "tests": {
+            "type": "array",
+            "description": "Array of test validations",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["function", "expect"],
+              "properties": {
+                "function": {
+                  "type": "string",
+                  "description": "CCL function to test",
+                  "enum": [
+                    "parse", "parse_value", "filter", "compose", "expand_dotted",
+                    "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
+                    "canonical_format", "load", "round_trip", "associativity"
+                  ]
+                },
+                "expect": {
+                  "description": "Expected result from the function",
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "description": "Array of key-value entries for parse functions OR array of strings for list functions",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "required": ["key", "value"],
+                            "properties": {
+                              "key": {"type": "string"},
+                              "value": {"type": "string"}
+                            },
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
                       }
-                    ]
+                    },
+                    {
+                      "type": "object",
+                      "description": "Object for hierarchy/object construction functions"
+                    },
+                    {
+                      "type": "string",
+                      "description": "String value for typed access functions"
+                    },
+                    {
+                      "type": "number",
+                      "description": "Numeric value for typed access functions"
+                    },
+                    {
+                      "type": "boolean",
+                      "description": "Boolean value for typed access functions"
+                    },
+                    {
+                      "type": "null",
+                      "description": "Null value for error cases"
+                    }
+                  ]
+                },
+                "args": {
+                  "type": "array",
+                  "description": "Optional arguments for parameterized functions",
+                  "items": {
+                    "type": "string"
                   }
                 },
-                {
-                  "type": "object",
-                  "description": "Object for hierarchy/object construction functions"
-                },
-                {
-                  "type": "string",
-                  "description": "String value for typed access functions"
-                },
-                {
-                  "type": "number",
-                  "description": "Numeric value for typed access functions"
-                },
-                {
+                "error": {
                   "type": "boolean",
-                  "description": "Boolean value for typed access functions"
-                },
-                {
-                  "type": "null",
-                  "description": "Null value for error cases"
+                  "description": "Whether function should produce an error",
+                  "default": false
                 }
-              ]
-            },
-            "args": {
-              "type": "array",
-              "description": "Optional arguments for parameterized functions",
-              "items": {
-                "type": "string"
-              }
-            },
-            "error": {
-              "type": "boolean",
-              "description": "Whether function should produce an error",
-              "default": false
+              },
+              "additionalProperties": false
             }
           },
-          "additionalProperties": false
-        }
-      },
-      "level": {
-        "type": "integer",
-        "description": "CCL implementation level (1-5)",
-        "minimum": 1,
-        "maximum": 5
-      },
-      "features": {
-        "type": "array",
-        "description": "Required language features for this test",
-        "items": {
-          "type": "string",
-          "enum": [
-            "comments", "empty_keys", "experimental_dotted_keys", "multiline", "unicode", "whitespace"
-          ]
-        },
-        "uniqueItems": true
-      },
-      "behaviors": {
-        "type": "array", 
-        "description": "Implementation behavior requirements (optional)",
-        "items": {
-          "type": "string",
-          "enum": [
-            "boolean_strict", "boolean_lenient",
-            "crlf_preserve_literal", "crlf_normalize_to_lf",
-            "tabs_preserve", "tabs_to_spaces",
-            "strict_spacing", "loose_spacing",
-            "list_coercion_enabled", "list_coercion_disabled"
-          ]
-        },
-        "uniqueItems": true
-      },
-      "variants": {
-        "type": "array",
-        "description": "Specification variants (optional)",
-        "items": {
-          "type": "string",
-          "enum": ["proposed_behavior", "reference_compliant"]
-        },
-        "uniqueItems": true
-      },
-      "conflicts": {
-        "type": "object",
-        "description": "Mutually exclusive options by category (optional)",
-        "properties": {
-          "functions": {
-            "type": "array",
-            "description": "Functions that conflict with this test",
-            "items": {"type": "string"}
-          },
-          "behaviors": {
-            "type": "array", 
-            "description": "Behaviors that conflict with this test's requirements",
-            "items": {"type": "string"}
-          },
-          "variants": {
-            "type": "array",
-            "description": "Variants that conflict with this test",
-            "items": {"type": "string"}
+          "level": {
+            "type": "integer",
+            "description": "CCL implementation level (1-5)",
+            "minimum": 1,
+            "maximum": 5
           },
           "features": {
             "type": "array",
-            "description": "Features that conflict with this test",
-            "items": {"type": "string"}
+            "description": "Required language features for this test",
+            "items": {
+              "type": "string",
+              "enum": [
+                "comments", "empty_keys", "experimental_dotted_keys", "multiline", "unicode", "whitespace"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "behaviors": {
+            "type": "array",
+            "description": "Implementation behavior requirements (optional)",
+            "items": {
+              "type": "string",
+              "enum": [
+                "boolean_strict", "boolean_lenient",
+                "crlf_preserve_literal", "crlf_normalize_to_lf",
+                "tabs_preserve", "tabs_to_spaces",
+                "strict_spacing", "loose_spacing",
+                "list_coercion_enabled", "list_coercion_disabled"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "variants": {
+            "type": "array",
+            "description": "Specification variants (optional)",
+            "items": {
+              "type": "string",
+              "enum": ["proposed_behavior", "reference_compliant"]
+            },
+            "uniqueItems": true
+          },
+          "conflicts": {
+            "type": "object",
+            "description": "Mutually exclusive options by category (optional)",
+            "properties": {
+              "functions": {
+                "type": "array",
+                "description": "Functions that conflict with this test",
+                "items": {"type": "string"}
+              },
+              "behaviors": {
+                "type": "array",
+                "description": "Behaviors that conflict with this test's requirements",
+                "items": {"type": "string"}
+              },
+              "variants": {
+                "type": "array",
+                "description": "Variants that conflict with this test",
+                "items": {"type": "string"}
+              },
+              "features": {
+                "type": "array",
+                "description": "Features that conflict with this test",
+                "items": {"type": "string"}
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false
       }
-    },
-    "additionalProperties": false
-  }
+    }
+  },
+  "additionalProperties": false
 }

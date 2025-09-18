@@ -16,12 +16,12 @@ func setupTestData(t *testing.T) string {
 
 	// Create test directories
 	testsDir := filepath.Join(tmpDir, "tests")
-	generatedDir := filepath.Join(tmpDir, "generated-tests")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 	if err := os.MkdirAll(testsDir, 0755); err != nil {
 		t.Fatalf("Failed to create tests directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated-tests directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create compact format test file
@@ -159,7 +159,7 @@ func TestTestLoader_LoadTestFile_FlatFormat(t *testing.T) {
 	cfg := createTestConfig()
 	loader := NewTestLoader(tmpDir, cfg)
 
-	flatFile := filepath.Join(tmpDir, "generated-tests", "test-basic.json")
+	flatFile := filepath.Join(tmpDir, "generated_tests", "test-basic.json")
 	opts := LoadOptions{
 		Format:     FormatFlat,
 		FilterMode: FilterAll,

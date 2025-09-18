@@ -19,14 +19,14 @@ import (
 func TestCrossPackage_LoaderGeneratorRoundTrip(t *testing.T) {
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	// Create directories
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create source format test data
@@ -301,13 +301,13 @@ func TestCrossPackage_ConfigCompatibilityFiltering(t *testing.T) {
 func TestCrossPackage_StatisticsAccuracy(t *testing.T) {
 	tmpDir := t.TempDir()
 	sourceDir := filepath.Join(tmpDir, "source")
-	generatedDir := filepath.Join(tmpDir, "generated")
+	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		t.Fatalf("Failed to create source directory: %v", err)
 	}
 	if err := os.MkdirAll(generatedDir, 0755); err != nil {
-		t.Fatalf("Failed to create generated directory: %v", err)
+		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
 	// Create source data with known characteristics

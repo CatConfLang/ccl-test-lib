@@ -13,8 +13,12 @@ alias c := clean
 
 # === BUILD ===
 
+# Sync schemas from ccl-test-data repository
+sync-schemas:
+    go run cmd/schema-sync/main.go schemas
+
 # Build all packages
-build:
+build: sync-schemas
     go build ./...
 
 # Build examples
