@@ -63,7 +63,7 @@ func (tl *TestLoader) LoadAllTests(opts LoadOptions) ([]types.TestCase, error) {
 		testDir = filepath.Join(tl.TestDataPath, "tests")
 		pattern = "*.json"
 	case FormatFlat:
-		testDir = filepath.Join(tl.TestDataPath, "generated-tests")
+		testDir = filepath.Join(tl.TestDataPath, "generated_tests")
 		pattern = "*.json"
 	default:
 		return nil, fmt.Errorf("unsupported test format: %v", opts.Format)
@@ -97,11 +97,20 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 
 	// Handle format detection
 	if opts.Format == FormatFlat {
-		// Flat format - array of TestCase (implementation-friendly)
+		// Flat format - can be either array of TestCase or object with tests array
 		var tests []types.TestCase
-		if err := json.Unmarshal(data, &tests); err != nil {
-			return nil, fmt.Errorf("failed to parse flat format JSON: %w", err)
+
+		// Try to unmarshal as TestSuite first (object with "tests" field)
+		var testSuite types.TestSuite
+		if err := json.Unmarshal(data, &testSuite); err == nil && len(testSuite.Tests) > 0 {
+			tests = testSuite.Tests
+		} else {
+			// Fallback: try as array of TestCase
+			if err := json.Unmarshal(data, &tests); err != nil {
+				return nil, fmt.Errorf("failed to parse flat format JSON: %w", err)
+			}
 		}
+
 		suite = types.TestSuite{
 			Suite:   "Flat Format",
 			Version: "1.0",
@@ -405,6 +414,12 @@ type CoverageInfo struct {
 	Compatible int // Tests compatible with this implementation
 }
 
+// CompactTestFile represents the top-level structure of source test files with $schema support
+type CompactTestFile struct {
+	Schema string        `json:"$schema,omitempty"`
+	Tests  []CompactTest `json:"tests"`
+}
+
 // CompactTest represents a test in compact format (source_tests/ files)
 type CompactTest struct {
 	Name      string              `json:"name"`
@@ -427,10 +442,13 @@ type CompactValidation struct {
 
 // loadCompactFormat parses compact format and converts to TestCase array
 func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
-	var compactTests []CompactTest
-	if err := json.Unmarshal(data, &compactTests); err != nil {
+	// Parse as object format with $schema and tests array
+	var compactTestFile CompactTestFile
+	if err := json.Unmarshal(data, &compactTestFile); err != nil {
 		return nil, fmt.Errorf("failed to parse compact format JSON: %w", err)
 	}
+
+	compactTests := compactTestFile.Tests
 
 	var testCases []types.TestCase
 	for _, compact := range compactTests {
