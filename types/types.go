@@ -73,7 +73,6 @@ type ValidationSet struct {
 type TestMetadata struct {
 	Tags       []string `json:"tags,omitempty"` // Legacy support
 	Conflicts  []string `json:"conflicts,omitempty"`
-	Level      int      `json:"level"`
 	Feature    string   `json:"feature,omitempty"`
 	Difficulty string   `json:"difficulty,omitempty"`
 }
@@ -85,7 +84,6 @@ type TestStatistics struct {
 	CompatibleTests   int
 	CompatibleAsserts int
 
-	ByLevel    map[int]int
 	ByFunction map[string]int
 	ByFeature  map[string]int
 

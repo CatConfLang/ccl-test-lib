@@ -91,7 +91,12 @@ func TestIntegration_LargeDatasetPerformance(t *testing.T) {
 		}
 
 		chunkData := sourceTests[chunk:end]
-		sourceData, _ := json.MarshalIndent(chunkData, "", "  ")
+		// Wrap chunk in CompactTestFile structure for correct parsing
+		chunkTestFile := loader.CompactTestFile{
+			Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+			Tests:  chunkData,
+		}
+		sourceData, _ := json.MarshalIndent(chunkTestFile, "", "  ")
 		sourceFile := filepath.Join(sourceDir, fmt.Sprintf("large_chunk_%d.json", chunk/chunkSize))
 		if err := os.WriteFile(sourceFile, sourceData, 0644); err != nil {
 			t.Fatalf("Failed to write source chunk %d: %v", chunk/chunkSize, err)
@@ -240,7 +245,12 @@ func TestIntegration_MemoryUsagePattern(t *testing.T) {
 		},
 	}
 
-	sourceData, _ := json.MarshalIndent(sourceTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests,
+	}
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "large_content.json"), sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source file: %v", err)
 	}
@@ -317,7 +327,12 @@ func TestIntegration_ConcurrentOperations(t *testing.T) {
 		},
 	}
 
-	sourceData, _ := json.MarshalIndent(sourceTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests,
+	}
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "concurrent.json"), sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source file: %v", err)
 	}
@@ -447,7 +462,12 @@ func TestIntegration_MixedFormatHandling(t *testing.T) {
 		},
 	}
 
-	compactData, _ := json.MarshalIndent(compactTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  compactTests,
+	}
+	compactData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(testsDir, "compact.json"), compactData, 0644); err != nil {
 		t.Fatalf("Failed to write compact file: %v", err)
 	}

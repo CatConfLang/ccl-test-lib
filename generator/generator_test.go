@@ -74,7 +74,12 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		},
 	}
 
-	sourceData, _ := json.MarshalIndent(compactTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  compactTests,
+	}
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "test-source.json"), sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source test file: %v", err)
 	}
@@ -100,7 +105,12 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		},
 	}
 
-	compactData, _ := json.MarshalIndent(compactTests2, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile2 := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  compactTests2,
+	}
+	compactData, _ := json.MarshalIndent(compactTestFile2, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "test-compact.json"), compactData, 0644); err != nil {
 		t.Fatalf("Failed to write compact test file: %v", err)
 	}

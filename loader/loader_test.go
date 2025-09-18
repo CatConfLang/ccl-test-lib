@@ -62,7 +62,12 @@ func setupTestData(t *testing.T) string {
 		},
 	}
 
-	compactData, _ := json.MarshalIndent(compactTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  compactTests,
+	}
+	compactData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(testsDir, "test-basic.json"), compactData, 0644); err != nil {
 		t.Fatalf("Failed to write compact test file: %v", err)
 	}

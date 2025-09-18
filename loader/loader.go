@@ -24,7 +24,6 @@ type LoadOptions struct {
 	Format       TestFormat                // Source or Flat
 	FilterMode   FilterMode                // Compatible, All, or Custom
 	CustomFilter func(types.TestCase) bool // Custom filtering function
-	LevelLimit   int                       // Maximum level to include (0 = no limit)
 }
 
 // TestFormat specifies which test format to load
@@ -129,25 +128,10 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 		}
 	}
 
-	// Apply level filtering if specified
-	if opts.LevelLimit > 0 {
-		var filteredTests []types.TestCase
-		for _, test := range suite.Tests {
-			if test.Meta.Level <= opts.LevelLimit {
-				filteredTests = append(filteredTests, test)
-			}
-		}
-		suite.Tests = filteredTests
-	}
 
 	return &suite, nil
 }
 
-// LoadTestsByLevel loads tests filtered by implementation level
-func (tl *TestLoader) LoadTestsByLevel(level int, opts LoadOptions) ([]types.TestCase, error) {
-	opts.LevelLimit = level
-	return tl.LoadAllTests(opts)
-}
 
 // LoadTestsByFunction loads tests filtered by CCL function
 func (tl *TestLoader) LoadTestsByFunction(fn config.CCLFunction, opts LoadOptions) ([]types.TestCase, error) {
@@ -317,7 +301,6 @@ func (tl *TestLoader) GetTestStatistics(tests []types.TestCase) types.TestStatis
 	stats := types.TestStatistics{
 		TotalTests:      len(tests),
 		TotalAssertions: len(tests), // Each test case is one assertion in flat format
-		ByLevel:         make(map[int]int),
 		ByFunction:      make(map[string]int),
 		ByFeature:       make(map[string]int),
 	}
@@ -327,8 +310,6 @@ func (tl *TestLoader) GetTestStatistics(tests []types.TestCase) types.TestStatis
 	stats.CompatibleAsserts = len(compatibleTests)
 
 	for _, test := range tests {
-		// Level statistics
-		stats.ByLevel[test.Meta.Level]++
 
 		// Function statistics
 		if test.Validation != "" {
@@ -425,7 +406,6 @@ type CompactTest struct {
 	Name      string              `json:"name"`
 	Input     string              `json:"input"`
 	Tests     []CompactValidation `json:"tests"`
-	Level     int                 `json:"level,omitempty"`
 	Features  []string            `json:"features,omitempty"`
 	Behaviors []string            `json:"behaviors,omitempty"`
 	Variants  []string            `json:"variants,omitempty"`
@@ -487,9 +467,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 			Behaviors: behaviors,
 			Variants:  variants,
 			Conflicts: conflicts,
-			Meta: types.TestMetadata{
-				Level: compact.Level,
-			},
+			Meta: types.TestMetadata{},
 		}
 
 		// Create ValidationSet from compact tests array

@@ -37,7 +37,7 @@ func setupIntegrationTestData(t *testing.T) string {
 		t.Fatalf("Failed to create generated_tests directory: %v", err)
 	}
 
-	// Create compact format test data
+	// Create compact format test data wrapped in CompactTestFile structure
 	compactTests := []loader.CompactTest{
 		{
 			Name:     "integration_test_1",
@@ -91,7 +91,13 @@ func setupIntegrationTestData(t *testing.T) string {
 		},
 	}
 
-	sourceData, _ := json.MarshalIndent(compactTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  compactTests,
+	}
+
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(testsDir, "integration.json"), sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source test file: %v", err)
 	}

@@ -72,8 +72,12 @@ func TestCrossPackage_LoaderGeneratorRoundTrip(t *testing.T) {
 		},
 	}
 
-	// Write source data
-	sourceData, _ := json.MarshalIndent(sourceTests, "", "  ")
+	// Write source data wrapped in CompactTestFile structure
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests,
+	}
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	sourceFile := filepath.Join(sourceDir, "roundtrip.json")
 	if err := os.WriteFile(sourceFile, sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source file: %v", err)
@@ -343,8 +347,12 @@ func TestCrossPackage_StatisticsAccuracy(t *testing.T) {
 		},
 	}
 
-	// Write source data
-	sourceData, _ := json.MarshalIndent(sourceTests, "", "  ")
+	// Write source data wrapped in CompactTestFile structure
+	compactTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests,
+	}
+	sourceData, _ := json.MarshalIndent(compactTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "stats.json"), sourceData, 0644); err != nil {
 		t.Fatalf("Failed to write source file: %v", err)
 	}

@@ -103,13 +103,21 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		},
 	}
 
-	// Write test source files
-	basicData, _ := json.MarshalIndent(sourceTests[:2], "", "  ")
+	// Write test source files wrapped in CompactTestFile structure
+	basicTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests[:2],
+	}
+	basicData, _ := json.MarshalIndent(basicTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "basic.json"), basicData, 0644); err != nil {
 		t.Fatalf("Failed to write basic tests: %v", err)
 	}
 
-	advancedData, _ := json.MarshalIndent(sourceTests[2:], "", "  ")
+	advancedTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sourceTests[2:],
+	}
+	advancedData, _ := json.MarshalIndent(advancedTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "advanced.json"), advancedData, 0644); err != nil {
 		t.Fatalf("Failed to write advanced tests: %v", err)
 	}
