@@ -31,12 +31,12 @@ type FlatGenerator struct {
 
 // GenerateOptions controls flat format generation behavior
 type GenerateOptions struct {
-	SkipPropertyTests bool                     // Skip property-*.json files
-	SkipLevels       []int                    // Skip specific levels
-	SkipFunctions    []config.CCLFunction     // Skip specific functions
-	OnlyFunctions    []config.CCLFunction     // Generate only these functions
-	SourceFormat     loader.TestFormat        // Input format (compact or flat)
-	Verbose          bool                     // Enable verbose output
+	SkipPropertyTests bool                 // Skip property-*.json files
+	SkipLevels        []int                // Skip specific levels
+	SkipFunctions     []config.CCLFunction // Skip specific functions
+	OnlyFunctions     []config.CCLFunction // Generate only these functions
+	SourceFormat      loader.TestFormat    // Input format (compact or flat)
+	Verbose           bool                 // Enable verbose output
 }
 
 // NewFlatGenerator creates a new flat format generator
@@ -62,7 +62,7 @@ func (fg *FlatGenerator) GenerateAll() error {
 
 	for _, file := range files {
 		basename := filepath.Base(file)
-		
+
 		// Skip property tests if requested
 		if fg.Options.SkipPropertyTests && strings.HasPrefix(basename, "property-") {
 			if fg.Options.Verbose {
@@ -87,7 +87,7 @@ func (fg *FlatGenerator) GenerateAll() error {
 func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
 	// Use loader to handle format detection and parsing
 	testLoader := loader.NewTestLoader("", config.ImplementationConfig{})
-	
+
 	sourceSuite, err := testLoader.LoadTestFile(sourceFile, loader.LoadOptions{
 		Format:     fg.Options.SourceFormat,
 		FilterMode: loader.FilterAll,
@@ -159,7 +159,7 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		fieldType := t.Field(i)
-		
+
 		if field.IsNil() {
 			continue // Skip nil validations
 		}
@@ -172,22 +172,22 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 
 		// Create flat test for this validation
 		flatTest := types.TestCase{
-			Name:       fmt.Sprintf("%s_%s", sourceTest.Name, validationName),
-			Input:      sourceTest.Input,
-			Input1:     sourceTest.Input1,
-			Input2:     sourceTest.Input2,
-			Input3:     sourceTest.Input3,
-			Validation: validationName,
-			Expected:   validationComponents.Expected,
-			Args:       validationComponents.Args,
+			Name:        fmt.Sprintf("%s_%s", sourceTest.Name, validationName),
+			Input:       sourceTest.Input,
+			Input1:      sourceTest.Input1,
+			Input2:      sourceTest.Input2,
+			Input3:      sourceTest.Input3,
+			Validation:  validationName,
+			Expected:    validationComponents.Expected,
+			Args:        validationComponents.Args,
 			ExpectError: validationComponents.Error,
-			Meta:       sourceTest.Meta,
-			SourceTest: sourceTest.Name,
+			Meta:        sourceTest.Meta,
+			SourceTest:  sourceTest.Name,
 		}
 
 		// Extract and populate type-safe metadata
 		flatTest.Functions, flatTest.Features = fg.GenerateMetadataFromValidation(validationName)
-		
+
 		// Copy behaviors and variants from source, ensuring never nil
 		if sourceTest.Behaviors != nil {
 			flatTest.Behaviors = sourceTest.Behaviors
@@ -199,7 +199,7 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		} else {
 			flatTest.Variants = make([]string, 0)
 		}
-		
+
 		// Only set conflicts if they exist and are non-empty
 		if sourceTest.Conflicts != nil {
 			// Check if the ConflictSet has any actual conflicts
@@ -351,12 +351,11 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 	return nil
 }
 
-
 // convertToFlatFormat converts old TestCase to generated flat format with proper Expected structure
 func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.TestItem {
 	// Create the proper Expected structure based on validation type
 	expected := fg.createExpectedStructure(test.Validation, test.Expected)
-	
+
 	// Convert behaviors, features, variants to the generated enum types
 	// Ensure these are never nil - initialize as empty if needed
 	testBehaviors := test.Behaviors
@@ -375,29 +374,29 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Test
 	if testFunctions == nil {
 		testFunctions = make([]string, 0)
 	}
-	
+
 	behaviors := fg.convertBehaviors(testBehaviors)
 	features := fg.convertFeatures(testFeatures)
 	variants := fg.convertVariants(testVariants)
 	functions := fg.convertFunctions(testFunctions)
-	
+
 	// Create a concrete struct that implements TestItem interface
 	flatTest := struct {
-		Args []string `json:"args,omitempty"`
-		Behaviors []generated.TestItemBehaviorsElem `json:"behaviors"`
-		Conflicts *generated.TestItemConflicts `json:"conflicts,omitempty"`
-		ErrorType *string `json:"error_type,omitempty"`
-		ExpectError bool `json:"expect_error,omitempty"`
-		Expected generated.TestItemExpected `json:"expected"`
-		Features []generated.TestItemFeaturesElem `json:"features"`
-		Functions []generated.TestItemFunctionsElem `json:"functions,omitempty"`
-		Input string `json:"input"`
-		Level *int `json:"level,omitempty"`
-		Name string `json:"name"`
-		Requires []string `json:"requires,omitempty"`
-		SourceTest *string `json:"source_test,omitempty"`
-		Validation generated.TestItemValidation `json:"validation"`
-		Variants []generated.TestItemVariantsElem `json:"variants"`
+		Args        []string                          `json:"args,omitempty"`
+		Behaviors   []generated.TestItemBehaviorsElem `json:"behaviors"`
+		Conflicts   *generated.TestItemConflicts      `json:"conflicts,omitempty"`
+		ErrorType   *string                           `json:"error_type,omitempty"`
+		ExpectError bool                              `json:"expect_error,omitempty"`
+		Expected    generated.TestItemExpected        `json:"expected"`
+		Features    []generated.TestItemFeaturesElem  `json:"features"`
+		Functions   []generated.TestItemFunctionsElem `json:"functions,omitempty"`
+		Input       string                            `json:"input"`
+		Level       *int                              `json:"level,omitempty"`
+		Name        string                            `json:"name"`
+		Requires    []string                          `json:"requires,omitempty"`
+		SourceTest  *string                           `json:"source_test,omitempty"`
+		Validation  generated.TestItemValidation      `json:"validation"`
+		Variants    []generated.TestItemVariantsElem  `json:"variants"`
 	}{
 		Name:       test.Name,
 		Input:      test.Input,
@@ -438,7 +437,7 @@ func (fg *FlatGenerator) getArgsForValidation(validation string, args []string) 
 // createExpectedStructure creates the proper Expected object with Count and data fields
 func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.TestItemExpected {
 	expected := generated.TestItemExpected{}
-	
+
 	switch validation {
 	case "parse", "parse_value", "filter", "compose", "expand_dotted":
 		// These validations expect entries (key-value pairs)
@@ -478,7 +477,7 @@ func (fg *FlatGenerator) createExpectedStructure(validation string, data interfa
 		expected.Count = 1
 		expected.Value = data
 	}
-	
+
 	return expected
 }
 
@@ -602,7 +601,7 @@ func parseValidationValue(value interface{}) ValidationComponents {
 func expectErrorFromValue(value interface{}) bool {
 	if str, ok := value.(string); ok {
 		return strings.Contains(strings.ToLower(str), "error") ||
-			   strings.Contains(strings.ToLower(str), "invalid")
+			strings.Contains(strings.ToLower(str), "invalid")
 	}
 	return false
 }

@@ -21,10 +21,10 @@ type TestLoader struct {
 
 // LoadOptions controls test loading behavior
 type LoadOptions struct {
-	Format       TestFormat                  // Source or Flat
-	FilterMode   FilterMode                  // Compatible, All, or Custom
-	CustomFilter func(types.TestCase) bool   // Custom filtering function
-	LevelLimit   int                         // Maximum level to include (0 = no limit)
+	Format       TestFormat                // Source or Flat
+	FilterMode   FilterMode                // Compatible, All, or Custom
+	CustomFilter func(types.TestCase) bool // Custom filtering function
+	LevelLimit   int                       // Maximum level to include (0 = no limit)
 }
 
 // TestFormat specifies which test format to load
@@ -94,7 +94,7 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 	}
 
 	var suite types.TestSuite
-	
+
 	// Handle format detection
 	if opts.Format == FormatFlat {
 		// Flat format - array of TestCase (implementation-friendly)
@@ -104,7 +104,7 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 		}
 		suite = types.TestSuite{
 			Suite:   "Flat Format",
-			Version: "1.0", 
+			Version: "1.0",
 			Tests:   tests,
 		}
 	} else {
@@ -367,7 +367,7 @@ func (tl *TestLoader) GetCapabilityCoverage() CapabilityCoverage {
 			}
 		}
 		coverage.Functions[fn] = CoverageInfo{
-			Available: fnTests,
+			Available:  fnTests,
 			Compatible: len(tl.FilterCompatibleTests(allTests)),
 		}
 	}
@@ -407,14 +407,14 @@ type CoverageInfo struct {
 
 // CompactTest represents a test in compact format (source_tests/ files)
 type CompactTest struct {
-	Name      string                `json:"name"`
-	Input     string                `json:"input"`
-	Tests     []CompactValidation   `json:"tests"`
-	Level     int                   `json:"level,omitempty"`
-	Features  []string              `json:"features,omitempty"`
-	Behaviors []string              `json:"behaviors,omitempty"`
-	Variants  []string              `json:"variants,omitempty"`
-	Conflicts *types.ConflictSet    `json:"conflicts,omitempty"`
+	Name      string              `json:"name"`
+	Input     string              `json:"input"`
+	Tests     []CompactValidation `json:"tests"`
+	Level     int                 `json:"level,omitempty"`
+	Features  []string            `json:"features,omitempty"`
+	Behaviors []string            `json:"behaviors,omitempty"`
+	Variants  []string            `json:"variants,omitempty"`
+	Conflicts *types.ConflictSet  `json:"conflicts,omitempty"`
 }
 
 // CompactValidation represents a single validation in compact format
@@ -453,7 +453,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 		if features == nil {
 			features = make([]string, 0)
 		}
-		behaviors := compact.Behaviors  
+		behaviors := compact.Behaviors
 		if behaviors == nil {
 			behaviors = make([]string, 0)
 		}
@@ -476,7 +476,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 
 		// Create ValidationSet from compact tests array
 		validations := &types.ValidationSet{}
-		
+
 		for _, test := range compact.Tests {
 			// Create validation object with expect and args fields if present
 			validationValue := createValidationObject(test)
@@ -514,7 +514,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 				validations.Canonical = validationValue
 			}
 		}
-		
+
 		testCase.Validations = validations
 		testCases = append(testCases, testCase)
 	}

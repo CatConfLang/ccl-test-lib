@@ -50,7 +50,7 @@ func main() {
 		fmt.Println("(This is expected if ccl-test-data is not available)")
 	} else {
 		fmt.Printf("Loaded %d compatible tests\n", len(tests))
-		
+
 		// Show some examples
 		for i, test := range tests[:min(3, len(tests))] {
 			fmt.Printf("Test %d: %s -> %s\n", i+1, test.Name, test.Validation)
@@ -60,7 +60,7 @@ func main() {
 	// Advanced usage: custom filtering
 	fmt.Println("\n=== Advanced Usage ===")
 	testLoader := ccl.NewLoader("../ccl-test-data", impl)
-	
+
 	// Load only Level 1-2 tests
 	basicTests, err := testLoader.LoadTestsByLevel(2, loader.LoadOptions{
 		Format:     loader.FormatFlat,

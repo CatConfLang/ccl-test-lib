@@ -15,7 +15,7 @@ func main() {
 
 	// Example: Generate flat format from source tests
 	fmt.Println("\n--- Generating Flat Format ---")
-	
+
 	// Basic generation
 	err := ccl.GenerateFlat("../ccl-test-data/tests", "../ccl-test-data/generated-tests-new")
 	if err != nil {
@@ -36,7 +36,7 @@ func main() {
 		SkipPropertyTests: true,
 		Verbose:           true,
 	})
-	
+
 	err = gen.GenerateAll()
 	if err != nil {
 		log.Printf("Warning: advanced generation failed: %v", err)
@@ -46,11 +46,11 @@ func main() {
 
 	// Example: Analyze test coverage across all implementations
 	fmt.Println("\n--- Test Coverage Analysis ---")
-	
+
 	// Mock implementation config for analysis
 	mockImpl := config.ImplementationConfig{
-		Name:    "analysis-mock",
-		Version: "v1.0.0",
+		Name:               "analysis-mock",
+		Version:            "v1.0.0",
 		SupportedFunctions: config.AllFunctions(), // All functions for full coverage
 		SupportedFeatures:  config.AllFeatures(),  // All features for full coverage
 		BehaviorChoices: []config.CCLBehavior{
@@ -71,20 +71,20 @@ func main() {
 		log.Printf("Warning: could not load all tests: %v", err)
 	} else {
 		stats := testLoader.GetTestStatistics(allTests)
-		
+
 		fmt.Printf("Total test cases: %d\n", stats.TotalTests)
 		fmt.Printf("Total assertions: %d\n", stats.TotalAssertions)
-		
+
 		fmt.Println("\nCoverage by Level:")
 		for level, count := range stats.ByLevel {
 			fmt.Printf("  Level %d: %d tests\n", level, count)
 		}
-		
+
 		fmt.Println("\nCoverage by Function:")
 		for fn, count := range stats.ByFunction {
 			fmt.Printf("  %s: %d tests\n", fn, count)
 		}
-		
+
 		fmt.Println("\nCoverage by Feature:")
 		for feature, count := range stats.ByFeature {
 			fmt.Printf("  %s: %d tests\n", feature, count)
@@ -93,7 +93,7 @@ func main() {
 
 	// Example: Implementation-specific compatibility analysis
 	fmt.Println("\n--- Implementation Compatibility ---")
-	
+
 	// Simulate a minimal implementation
 	minimalImpl := config.ImplementationConfig{
 		Name:    "minimal-impl",
@@ -121,7 +121,7 @@ func main() {
 		log.Printf("Warning: could not load compatible tests: %v", err)
 	} else {
 		fmt.Printf("Minimal implementation can run %d tests\n", len(compatibleTests))
-		
+
 		// Show coverage analysis
 		coverage := minimalLoader.GetCapabilityCoverage()
 		fmt.Println("\nFunction Coverage for Minimal Implementation:")
@@ -132,7 +132,7 @@ func main() {
 
 	// Example: Level-based progressive testing
 	fmt.Println("\n--- Progressive Implementation Support ---")
-	
+
 	for level := 1; level <= 4; level++ {
 		levelTests, err := testLoader.LoadTestsByLevel(level, loader.LoadOptions{
 			Format:     loader.FormatFlat,

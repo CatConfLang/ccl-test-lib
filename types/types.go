@@ -94,7 +94,7 @@ type TestStatistics struct {
 
 // ConflictSummary provides analysis of conflicting test sets
 type ConflictSummary struct {
-	ConflictType  string   // "behavior", "variant", "feature"
+	ConflictType  string // "behavior", "variant", "feature"
 	ConflictsWith []string
 	TestCount     int
 	AssertCount   int

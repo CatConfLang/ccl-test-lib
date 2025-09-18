@@ -64,12 +64,12 @@ func AllFunctions() []CCLFunction {
 type CCLFeature string
 
 const (
-	FeatureComments              CCLFeature = "comments"
+	FeatureComments               CCLFeature = "comments"
 	FeatureExperimentalDottedKeys CCLFeature = "experimental_dotted_keys"
-	FeatureEmptyKeys             CCLFeature = "empty_keys"
-	FeatureMultiline             CCLFeature = "multiline"
-	FeatureUnicode               CCLFeature = "unicode"
-	FeatureWhitespace            CCLFeature = "whitespace"
+	FeatureEmptyKeys              CCLFeature = "empty_keys"
+	FeatureMultiline              CCLFeature = "multiline"
+	FeatureUnicode                CCLFeature = "unicode"
+	FeatureWhitespace             CCLFeature = "whitespace"
 )
 
 // AllFeatures returns all valid CCL features
