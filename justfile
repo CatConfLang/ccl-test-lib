@@ -17,8 +17,12 @@ alias c := clean
 sync-schemas:
     go run cmd/schema-sync/main.go schemas
 
+# Generate Go types from schemas
+generate: sync-schemas
+    go generate ./...
+
 # Build all packages
-build: sync-schemas
+build: generate
     go build ./...
 
 # Build examples
@@ -37,6 +41,7 @@ deps:
 dev:
     just format
     just lint
+    just generate
     just build
     just test
 
@@ -45,6 +50,7 @@ ci:
     just deps
     just format-check
     just lint
+    just generate
     just build
     just test
     just vet

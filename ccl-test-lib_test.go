@@ -42,7 +42,6 @@ func setupIntegrationTestData(t *testing.T) string {
 		{
 			Name:     "integration_test_1",
 			Input:    "name = Alice\nage = 25",
-			Level:    1,
 			Features: []string{"comments"},
 			Tests: []loader.CompactValidation{
 				{
@@ -74,7 +73,6 @@ func setupIntegrationTestData(t *testing.T) string {
 		{
 			Name:     "integration_test_2",
 			Input:    "enabled = true\ncount = 42",
-			Level:    2,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{
@@ -114,7 +112,6 @@ func setupIntegrationTestData(t *testing.T) string {
 			Behaviors:  []string{},
 			Variants:   []string{},
 			SourceTest: "flat_test",
-			Meta:       types.TestMetadata{Level: 1},
 		},
 		{
 			Name:       "flat_test_get_string",
@@ -127,7 +124,6 @@ func setupIntegrationTestData(t *testing.T) string {
 			Behaviors:  []string{},
 			Variants:   []string{},
 			SourceTest: "flat_test",
-			Meta:       types.TestMetadata{Level: 1},
 		},
 	}
 
@@ -348,9 +344,6 @@ func TestGetTestStats(t *testing.T) {
 	}
 
 	// Verify maps are initialized
-	if stats.ByLevel == nil {
-		t.Error("ByLevel map should be initialized")
-	}
 	if stats.ByFunction == nil {
 		t.Error("ByFunction map should be initialized")
 	}

@@ -110,6 +110,11 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 			}
 		}
 
+		// Convert structured Expected objects to simple values for flat format tests
+		for i := range tests {
+			tests[i].Expected = tl.extractExpectedValue(tests[i].Validation, tests[i].Expected)
+		}
+
 		suite = types.TestSuite{
 			Suite:   "Flat Format",
 			Version: "1.0",
@@ -539,4 +544,54 @@ func createValidationObject(test CompactValidation) interface{} {
 	}
 
 	return validationObj
+}
+
+// extractExpectedValue extracts the appropriate value from a structured Expected object
+// based on the validation type, handling both simple values and structured objects
+func (tl *TestLoader) extractExpectedValue(validation string, expected interface{}) interface{} {
+	// If it's already a simple value, return as-is
+	if expected == nil {
+		return nil
+	}
+
+	// Check if it's a structured Expected object with Count/Value/Object/etc fields
+	expectedMap, isMap := expected.(map[string]interface{})
+	if !isMap {
+		// Simple value, return as-is
+		return expected
+	}
+
+	// Check if it has the structured format fields
+	_, hasCount := expectedMap["count"]
+	if !hasCount {
+		// Not a structured format, return as-is
+		return expected
+	}
+
+	// Extract the appropriate field based on validation type
+	switch validation {
+	case "parse", "parse_value", "filter", "compose", "expand_dotted":
+		// These expect entries
+		if entries, ok := expectedMap["entries"]; ok {
+			return entries
+		}
+	case "build_hierarchy":
+		// Expects an object
+		if object, ok := expectedMap["object"]; ok {
+			return object
+		}
+	case "get_string", "get_int", "get_bool", "get_float":
+		// Typed access expects a single value
+		if value, ok := expectedMap["value"]; ok {
+			return value
+		}
+	case "get_list":
+		// List access expects a list
+		if list, ok := expectedMap["list"]; ok {
+			return list
+		}
+	}
+
+	// Fallback: return the original expected value
+	return expected
 }

@@ -61,15 +61,15 @@ func main() {
 	fmt.Println("\n=== Advanced Usage ===")
 	testLoader := ccl.NewLoader("../ccl-test-data", impl)
 
-	// Load only Level 1-2 tests
-	basicTests, err := testLoader.LoadTestsByLevel(2, loader.LoadOptions{
+	// Load compatible tests
+	basicTests, err := testLoader.LoadAllTests(loader.LoadOptions{
 		Format:     loader.FormatFlat,
 		FilterMode: loader.FilterCompatible,
 	})
 	if err != nil {
 		log.Printf("Warning: could not load basic tests: %v", err)
 	} else {
-		fmt.Printf("Loaded %d Level 1-2 tests\n", len(basicTests))
+		fmt.Printf("Loaded %d compatible tests\n", len(basicTests))
 	}
 
 	// Load only parsing tests

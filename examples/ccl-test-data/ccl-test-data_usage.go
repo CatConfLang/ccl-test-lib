@@ -75,10 +75,6 @@ func main() {
 		fmt.Printf("Total test cases: %d\n", stats.TotalTests)
 		fmt.Printf("Total assertions: %d\n", stats.TotalAssertions)
 
-		fmt.Println("\nCoverage by Level:")
-		for level, count := range stats.ByLevel {
-			fmt.Printf("  Level %d: %d tests\n", level, count)
-		}
 
 		fmt.Println("\nCoverage by Function:")
 		for fn, count := range stats.ByFunction {
@@ -130,19 +126,18 @@ func main() {
 		}
 	}
 
-	// Example: Level-based progressive testing
-	fmt.Println("\n--- Progressive Implementation Support ---")
+	// Example: Test availability analysis
+	fmt.Println("\n--- Test Suite Analysis ---")
 
-	for level := 1; level <= 4; level++ {
-		levelTests, err := testLoader.LoadTestsByLevel(level, loader.LoadOptions{
-			Format:     loader.FormatFlat,
-			FilterMode: loader.FilterAll,
-		})
-		if err != nil {
-			log.Printf("Warning: could not load Level %d tests: %v", level, err)
-			continue
-		}
-		fmt.Printf("Level %d: %d tests (cumulative)\n", level, len(levelTests))
+	// Load all available tests
+	allTests, err = testLoader.LoadAllTests(loader.LoadOptions{
+		Format:     loader.FormatFlat,
+		FilterMode: loader.FilterAll,
+	})
+	if err != nil {
+		log.Printf("Warning: could not load tests: %v", err)
+	} else {
+		fmt.Printf("Total available tests: %d\n", len(allTests))
 	}
 
 	fmt.Println("\nCCL Test Data analysis completed successfully!")

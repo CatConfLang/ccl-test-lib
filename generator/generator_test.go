@@ -30,7 +30,6 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		{
 			Name:     "multi_validation_test",
 			Input:    "key = value\ncount = 42",
-			Level:    1,
 			Features: []string{"comments"},
 			Tests: []loader.CompactValidation{
 				{
@@ -62,7 +61,6 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		{
 			Name:     "single_validation_test",
 			Input:    "flag = true",
-			Level:    2,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{
@@ -89,7 +87,6 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		{
 			Name:     "compact_test",
 			Input:    "name = test",
-			Level:    1,
 			Features: []string{"multiline"},
 			Tests: []loader.CompactValidation{
 				{
@@ -120,7 +117,6 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		{
 			Name:     "property_test",
 			Input:    "a = 1",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{
@@ -131,7 +127,12 @@ func setupGeneratorTestData(t *testing.T) (string, string) {
 		},
 	}
 
-	propertyData, _ := json.MarshalIndent(propertyTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	propertyTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  propertyTests,
+	}
+	propertyData, _ := json.MarshalIndent(propertyTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "property-test.json"), propertyData, 0644); err != nil {
 		t.Fatalf("Failed to write property test file: %v", err)
 	}
@@ -310,7 +311,6 @@ func TestFlatGenerator_TransformSourceToFlat(t *testing.T) {
 			},
 		},
 		Features: []string{"comments"},
-		Meta:     types.TestMetadata{Level: 1},
 	}
 
 	flatTests, err := generator.TransformSourceToFlat(sourceTest)
@@ -501,32 +501,6 @@ func TestFlatGenerator_ValidateGenerated_InvalidFile(t *testing.T) {
 	}
 }
 
-func TestFlatGenerator_ApplyFiltering_SkipLevels(t *testing.T) {
-	sourceDir, outputDir := setupGeneratorTestData(t)
-
-	opts := GenerateOptions{
-		SkipLevels: []int{2},
-	}
-	generator := NewFlatGenerator(sourceDir, outputDir, opts)
-
-	tests := []types.TestCase{
-		{Name: "level1", Meta: types.TestMetadata{Level: 1}},
-		{Name: "level2", Meta: types.TestMetadata{Level: 2}},
-		{Name: "level3", Meta: types.TestMetadata{Level: 3}},
-	}
-
-	filtered := generator.applyFiltering(tests)
-
-	if len(filtered) != 2 {
-		t.Errorf("Expected 2 tests after filtering level 2, got %d", len(filtered))
-	}
-
-	for _, test := range filtered {
-		if test.Meta.Level == 2 {
-			t.Error("Level 2 test should have been filtered out")
-		}
-	}
-}
 
 func TestFlatGenerator_ApplyFiltering_SkipFunctions(t *testing.T) {
 	sourceDir, outputDir := setupGeneratorTestData(t)

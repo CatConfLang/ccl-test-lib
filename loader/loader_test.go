@@ -29,7 +29,6 @@ func setupTestData(t *testing.T) string {
 		{
 			Name:     "test_parse",
 			Input:    "key = value",
-			Level:    1,
 			Features: []string{"comments"},
 			Tests: []CompactValidation{
 				{
@@ -45,7 +44,6 @@ func setupTestData(t *testing.T) string {
 		{
 			Name:     "test_typed_access",
 			Input:    "count = 42\nflag = true",
-			Level:    2,
 			Features: []string{},
 			Tests: []CompactValidation{
 				{
@@ -84,7 +82,6 @@ func setupTestData(t *testing.T) string {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  "test_parse",
-			Meta:        types.TestMetadata{Level: 1},
 		},
 		{
 			Name:        "test_parse_build_hierarchy",
@@ -96,7 +93,6 @@ func setupTestData(t *testing.T) string {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  "test_parse",
-			Meta:        types.TestMetadata{Level: 1},
 		},
 		{
 			Name:        "test_typed_access_get_int",
@@ -109,7 +105,6 @@ func setupTestData(t *testing.T) string {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  "test_typed_access",
-			Meta:        types.TestMetadata{Level: 2},
 		},
 	}
 
@@ -283,34 +278,6 @@ func TestTestLoader_LoadAllTests_CompactFormat(t *testing.T) {
 	for i, test := range tests {
 		if test.Name != expectedNames[i] {
 			t.Errorf("Expected test %d name %s, got %s", i, expectedNames[i], test.Name)
-		}
-	}
-}
-
-func TestTestLoader_LoadTestsByLevel(t *testing.T) {
-	tmpDir := setupTestData(t)
-	cfg := createTestConfig()
-	loader := NewTestLoader(tmpDir, cfg)
-
-	opts := LoadOptions{
-		Format:     FormatFlat,
-		FilterMode: FilterAll,
-	}
-
-	// Load level 1 tests only
-	tests, err := loader.LoadTestsByLevel(1, opts)
-	if err != nil {
-		t.Fatalf("Failed to load level 1 tests: %v", err)
-	}
-
-	if len(tests) != 2 {
-		t.Errorf("Expected 2 level 1 tests, got %d", len(tests))
-	}
-
-	// Verify all tests are level 1
-	for _, test := range tests {
-		if test.Meta.Level != 1 {
-			t.Errorf("Expected level 1 test, got level %d", test.Meta.Level)
 		}
 	}
 }
@@ -519,13 +486,6 @@ func TestTestLoader_GetTestStatistics(t *testing.T) {
 		t.Errorf("Expected 3 compatible tests, got %d", stats.CompatibleTests)
 	}
 
-	// Check level distribution
-	if stats.ByLevel[1] != 2 {
-		t.Errorf("Expected 2 level 1 tests, got %d", stats.ByLevel[1])
-	}
-	if stats.ByLevel[2] != 1 {
-		t.Errorf("Expected 1 level 2 test, got %d", stats.ByLevel[2])
-	}
 
 	// Check function distribution (may have multiple due to Functions metadata)
 	if stats.ByFunction["parse"] < 1 {
@@ -643,15 +603,22 @@ func TestLoadOptions_FilterModes(t *testing.T) {
 	// Test FilterCustom mode
 	opts.FilterMode = FilterCustom
 	opts.CustomFilter = func(test types.TestCase) bool {
-		return test.Meta.Level == 1
+		return test.Validation == "parse"
 	}
 	customTests, err := loader.LoadAllTests(opts)
 	if err != nil {
 		t.Fatalf("Failed to load tests with FilterCustom: %v", err)
 	}
 
-	if len(customTests) != 2 {
-		t.Errorf("Expected 2 level 1 tests with custom filter, got %d", len(customTests))
+	if len(customTests) < 1 {
+		t.Errorf("Expected at least 1 parse test with custom filter, got %d", len(customTests))
+	}
+
+	// Verify all returned tests are parse tests
+	for _, test := range customTests {
+		if test.Validation != "parse" {
+			t.Errorf("Custom filter should only return parse tests, got %s", test.Validation)
+		}
 	}
 }
 
@@ -720,7 +687,6 @@ func TestCompactTest_JSONMarshaling(t *testing.T) {
 	compact := CompactTest{
 		Name:     "test_compact",
 		Input:    "key = value",
-		Level:    1,
 		Features: []string{"comments"},
 		Tests: []CompactValidation{
 			{

@@ -55,7 +55,6 @@ func TestTestCase_SourceFormat(t *testing.T) {
 		Behaviors: []string{"crlf_normalize_to_lf"},
 		Variants:  []string{"proposed_behavior"},
 		Meta: TestMetadata{
-			Level: 1,
 			Tags:  []string{"function:parse"},
 		},
 	}
@@ -97,7 +96,6 @@ func TestTestCase_FlatFormat(t *testing.T) {
 		Behaviors:   []string{},
 		Variants:    []string{},
 		Meta: TestMetadata{
-			Level: 1,
 		},
 		SourceTest: "original_test",
 	}
@@ -207,11 +205,6 @@ func TestTestStatistics_Basic(t *testing.T) {
 		TotalAssertions:   150,
 		CompatibleTests:   80,
 		CompatibleAsserts: 120,
-		ByLevel: map[int]int{
-			1: 30,
-			2: 40,
-			3: 30,
-		},
 		ByFunction: map[string]int{
 			"parse":           50,
 			"build_hierarchy": 30,
@@ -249,9 +242,6 @@ func TestTestStatistics_Basic(t *testing.T) {
 	}
 	if unmarshaled.CompatibleTests != 80 {
 		t.Errorf("Expected 80 compatible tests, got %d", unmarshaled.CompatibleTests)
-	}
-	if len(unmarshaled.ByLevel) != 3 {
-		t.Errorf("Expected 3 levels, got %d", len(unmarshaled.ByLevel))
 	}
 	if len(unmarshaled.ConflictingSets) != 1 {
 		t.Errorf("Expected 1 conflicting set, got %d", len(unmarshaled.ConflictingSets))
@@ -324,7 +314,6 @@ func TestTestMetadata_LegacySupport(t *testing.T) {
 	meta := TestMetadata{
 		Tags:       []string{"function:parse", "feature:comments", "level:1"},
 		Conflicts:  []string{"boolean_strict"},
-		Level:      2,
 		Feature:    "comments",
 		Difficulty: "easy",
 	}
@@ -344,9 +333,6 @@ func TestTestMetadata_LegacySupport(t *testing.T) {
 	// Verify legacy support fields
 	if len(unmarshaled.Tags) != 3 {
 		t.Errorf("Expected 3 tags, got %d", len(unmarshaled.Tags))
-	}
-	if unmarshaled.Level != 2 {
-		t.Errorf("Expected level 2, got %d", unmarshaled.Level)
 	}
 	if unmarshaled.Feature != "comments" {
 		t.Errorf("Expected feature 'comments', got %s", unmarshaled.Feature)

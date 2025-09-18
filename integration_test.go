@@ -378,53 +378,47 @@ func TestIntegration_LevelBasedFiltering(t *testing.T) {
 		t.Skip("ccl-test-data directory not found - skipping level-based filtering tests")
 	}
 
-	cfg := config.ImplementationConfig{
-		Name:    "level-filter-test",
-		Version: "v1.0.0",
-		SupportedFunctions: []config.CCLFunction{
-			config.FunctionParse,
-			config.FunctionBuildHierarchy,
-			config.FunctionGetString,
-		},
-		SupportedFeatures: []config.CCLFeature{
-			config.FeatureComments,
-		},
-		BehaviorChoices: []config.CCLBehavior{
-			config.BehaviorCRLFNormalize,
-		},
-		VariantChoice: config.VariantProposed,
+
+	// Test progressive implementation - different capability levels
+	capabilities := []struct {
+		name      string
+		functions []config.CCLFunction
+	}{
+		{"minimal", []config.CCLFunction{config.FunctionParse}},
+		{"basic", []config.CCLFunction{config.FunctionParse, config.FunctionBuildHierarchy}},
+		{"intermediate", []config.CCLFunction{config.FunctionParse, config.FunctionBuildHierarchy, config.FunctionGetString}},
+		{"advanced", []config.CCLFunction{config.FunctionParse, config.FunctionBuildHierarchy, config.FunctionGetString, config.FunctionGetInt, config.FunctionGetBool}},
 	}
 
-	loader := NewLoader(testDataPath, cfg)
-
-	// Test different level limits
-	levels := []int{1, 2, 3, 4, 5}
 	var previousCount int
+	for _, cap := range capabilities {
+		// Create a new config with this capability level
+		testCfg := config.ImplementationConfig{
+			Name:               "progressive-test",
+			Version:            "v1.0.0",
+			SupportedFunctions: cap.functions,
+			SupportedFeatures:  []config.CCLFeature{config.FeatureComments},
+			BehaviorChoices:    []config.CCLBehavior{config.BehaviorCRLFNormalize},
+			VariantChoice:      config.VariantProposed,
+		}
 
-	for _, level := range levels {
-		tests, err := loader.LoadTestsByLevel(level, LoadOptions{
+		testLoader := NewLoader(testDataPath, testCfg)
+		tests, err := testLoader.LoadAllTests(LoadOptions{
 			Format:     FormatFlat,
 			FilterMode: FilterCompatible,
 		})
 		if err != nil {
-			t.Fatalf("Failed to load tests for level %d: %v", level, err)
+			t.Fatalf("Failed to load tests for %s capability: %v", cap.name, err)
 		}
 
-		t.Logf("Level %d: %d tests", level, len(tests))
+		t.Logf("%s capability: %d tests", cap.name, len(tests))
 
-		// Higher levels should include more or equal tests (cumulative)
+		// Higher capability levels should include more or equal tests (cumulative)
 		if len(tests) < previousCount {
-			t.Errorf("Level %d should have at least as many tests as level %d (%d vs %d)",
-				level, level-1, len(tests), previousCount)
-		}
-
-		// Verify all tests are at or below the requested level
-		for _, test := range tests {
-			if test.Meta.Level > level {
-				t.Errorf("Test %s at level %d should not be included in level %d results",
-					test.Name, test.Meta.Level, level)
+			t.Errorf("%s capability should have at least as many tests as previous capability (%d vs %d)",
+				cap.name, len(tests), previousCount)
 			}
-		}
+
 
 		previousCount = len(tests)
 	}

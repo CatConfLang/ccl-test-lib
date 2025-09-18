@@ -44,7 +44,6 @@ func TestIntegration_LargeDatasetPerformance(t *testing.T) {
 		sourceTests[i] = loader.CompactTest{
 			Name:     fmt.Sprintf("large_test_%d", i),
 			Input:    fmt.Sprintf("key_%d = value_%d\ncount_%d = %d\nflag_%d = true", i, i, i, i, i),
-			Level:    (i % 5) + 1, // Distribute across levels 1-5
 			Features: []string{"comments"},
 			Tests: []loader.CompactValidation{
 				{
@@ -219,7 +218,6 @@ func TestIntegration_MemoryUsagePattern(t *testing.T) {
 		{
 			Name:     "large_content_test",
 			Input:    fmt.Sprintf("large_key = %s\nother_key = small_value", largeString),
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{
@@ -318,7 +316,6 @@ func TestIntegration_ConcurrentOperations(t *testing.T) {
 		{
 			Name:     "concurrent_test",
 			Input:    "key = value",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{{"key": "key", "value": "value"}}},
@@ -454,7 +451,6 @@ func TestIntegration_MixedFormatHandling(t *testing.T) {
 		{
 			Name:     "compact_format_test",
 			Input:    "compact_key = compact_value",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{{"key": "compact_key", "value": "compact_value"}}},
@@ -484,7 +480,6 @@ func TestIntegration_MixedFormatHandling(t *testing.T) {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  "flat_format_test",
-			Meta:        types.TestMetadata{Level: 1},
 		},
 	}
 
@@ -578,7 +573,6 @@ func BenchmarkIntegration_LoadingPerformance(b *testing.B) {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  fmt.Sprintf("bench_test_%d", i),
-			Meta:        types.TestMetadata{Level: 1},
 		}
 	}
 
@@ -630,7 +624,6 @@ func BenchmarkIntegration_StatisticsPerformance(b *testing.B) {
 			Behaviors:   []string{},
 			Variants:    []string{},
 			SourceTest:  fmt.Sprintf("stats_test_%d", i),
-			Meta:        types.TestMetadata{Level: (i % 3) + 1},
 		}
 	}
 

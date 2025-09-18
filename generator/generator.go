@@ -32,7 +32,6 @@ type FlatGenerator struct {
 // GenerateOptions controls flat format generation behavior
 type GenerateOptions struct {
 	SkipPropertyTests bool                 // Skip property-*.json files
-	SkipLevels        []int                // Skip specific levels
 	SkipFunctions     []config.CCLFunction // Skip specific functions
 	OnlyFunctions     []config.CCLFunction // Generate only these functions
 	SourceFormat      loader.TestFormat    // Input format (compact or flat)
@@ -116,7 +115,7 @@ func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
 	flatSuite.Tests = fg.applyFiltering(flatSuite.Tests)
 
 	// Convert to generated flat format types (array of flat test cases)
-	var flatTests []generated.TestItem
+	var flatTests []generated.GeneratedFormatJsonTestsElem
 	for _, test := range flatSuite.Tests {
 		flatTest := fg.convertToFlatFormat(test)
 		flatTests = append(flatTests, flatTest)
@@ -280,17 +279,7 @@ func (fg *FlatGenerator) applyFiltering(tests []types.TestCase) []types.TestCase
 	var filtered []types.TestCase
 
 	for _, test := range tests {
-		// Skip levels if specified
-		skip := false
-		for _, skipLevel := range fg.Options.SkipLevels {
-			if test.Meta.Level == skipLevel {
-				skip = true
-				break
-			}
-		}
-		if skip {
-			continue
-		}
+		var skip bool
 
 		// Skip functions if specified
 		if len(fg.Options.SkipFunctions) > 0 {
@@ -352,7 +341,7 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 }
 
 // convertToFlatFormat converts old TestCase to generated flat format with proper Expected structure
-func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.TestItem {
+func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.GeneratedFormatJsonTestsElem {
 	// Create the proper Expected structure based on validation type
 	expected := fg.createExpectedStructure(test.Validation, test.Expected)
 
@@ -383,24 +372,24 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Test
 	// Create a concrete struct that implements TestItem interface
 	flatTest := struct {
 		Args        []string                          `json:"args,omitempty"`
-		Behaviors   []generated.TestItemBehaviorsElem `json:"behaviors"`
-		Conflicts   *generated.TestItemConflicts      `json:"conflicts,omitempty"`
+		Behaviors   []generated.GeneratedFormatJsonTestsElemBehaviorsElem `json:"behaviors"`
+		Conflicts   *generated.GeneratedFormatJsonTestsElemConflicts      `json:"conflicts,omitempty"`
 		ErrorType   *string                           `json:"error_type,omitempty"`
 		ExpectError bool                              `json:"expect_error,omitempty"`
-		Expected    generated.TestItemExpected        `json:"expected"`
-		Features    []generated.TestItemFeaturesElem  `json:"features"`
-		Functions   []generated.TestItemFunctionsElem `json:"functions,omitempty"`
+		Expected    generated.GeneratedFormatJsonTestsElemExpected        `json:"expected"`
+		Features    []generated.GeneratedFormatJsonTestsElemFeaturesElem  `json:"features"`
+		Functions   []generated.GeneratedFormatJsonTestsElemFunctionsElem `json:"functions,omitempty"`
 		Input       string                            `json:"input"`
 		Level       *int                              `json:"level,omitempty"`
 		Name        string                            `json:"name"`
 		Requires    []string                          `json:"requires,omitempty"`
 		SourceTest  *string                           `json:"source_test,omitempty"`
-		Validation  generated.TestItemValidation      `json:"validation"`
-		Variants    []generated.TestItemVariantsElem  `json:"variants"`
+		Validation  generated.GeneratedFormatJsonTestsElemValidation      `json:"validation"`
+		Variants    []generated.GeneratedFormatJsonTestsElemVariantsElem  `json:"variants"`
 	}{
 		Name:       test.Name,
 		Input:      test.Input,
-		Validation: generated.TestItemValidation(test.Validation),
+		Validation: generated.GeneratedFormatJsonTestsElemValidation(test.Validation),
 		Expected:   expected,
 		Functions:  functions,
 		Features:   features,
@@ -408,10 +397,10 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Test
 		Variants:   variants,
 		Args:       fg.getArgsForValidation(test.Validation, test.Args),
 		SourceTest: &test.SourceTest,
-		Level:      &test.Meta.Level,
 	}
 
-	return flatTest
+	// Convert to the proper interface type
+	return generated.GeneratedFormatJsonTestsElem(flatTest)
 }
 
 // getArgsForValidation returns args only for typed access functions, nil for others
@@ -435,20 +424,20 @@ func (fg *FlatGenerator) getArgsForValidation(validation string, args []string) 
 }
 
 // createExpectedStructure creates the proper Expected object with Count and data fields
-func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.TestItemExpected {
-	expected := generated.TestItemExpected{}
+func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.GeneratedFormatJsonTestsElemExpected {
+	expected := generated.GeneratedFormatJsonTestsElemExpected{}
 
 	switch validation {
 	case "parse", "parse_value", "filter", "compose", "expand_dotted":
 		// These validations expect entries (key-value pairs)
 		if entries, ok := data.([]interface{}); ok {
 			expected.Count = len(entries)
-			var entryList []generated.TestItemExpectedEntriesElem
+			var entryList []generated.GeneratedFormatJsonTestsElemExpectedEntriesElem
 			for _, entry := range entries {
 				if entryMap, ok := entry.(map[string]interface{}); ok {
 					if key, hasKey := entryMap["key"].(string); hasKey {
 						if value, hasValue := entryMap["value"].(string); hasValue {
-							entryList = append(entryList, generated.TestItemExpectedEntriesElem{
+							entryList = append(entryList, generated.GeneratedFormatJsonTestsElemExpectedEntriesElem{
 								Key:   key,
 								Value: value,
 							})
@@ -482,34 +471,34 @@ func (fg *FlatGenerator) createExpectedStructure(validation string, data interfa
 }
 
 // Helper functions for converting enum types
-func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.TestItemBehaviorsElem {
-	result := make([]generated.TestItemBehaviorsElem, 0, len(behaviors))
+func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.GeneratedFormatJsonTestsElemBehaviorsElem {
+	result := make([]generated.GeneratedFormatJsonTestsElemBehaviorsElem, 0, len(behaviors))
 	for _, b := range behaviors {
-		result = append(result, generated.TestItemBehaviorsElem(b))
+		result = append(result, generated.GeneratedFormatJsonTestsElemBehaviorsElem(b))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFeatures(features []string) []generated.TestItemFeaturesElem {
-	result := make([]generated.TestItemFeaturesElem, 0, len(features))
+func (fg *FlatGenerator) convertFeatures(features []string) []generated.GeneratedFormatJsonTestsElemFeaturesElem {
+	result := make([]generated.GeneratedFormatJsonTestsElemFeaturesElem, 0, len(features))
 	for _, f := range features {
-		result = append(result, generated.TestItemFeaturesElem(f))
+		result = append(result, generated.GeneratedFormatJsonTestsElemFeaturesElem(f))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertVariants(variants []string) []generated.TestItemVariantsElem {
-	result := make([]generated.TestItemVariantsElem, 0, len(variants))
+func (fg *FlatGenerator) convertVariants(variants []string) []generated.GeneratedFormatJsonTestsElemVariantsElem {
+	result := make([]generated.GeneratedFormatJsonTestsElemVariantsElem, 0, len(variants))
 	for _, v := range variants {
-		result = append(result, generated.TestItemVariantsElem(v))
+		result = append(result, generated.GeneratedFormatJsonTestsElemVariantsElem(v))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFunctions(functions []string) []generated.TestItemFunctionsElem {
-	result := make([]generated.TestItemFunctionsElem, 0, len(functions))
+func (fg *FlatGenerator) convertFunctions(functions []string) []generated.GeneratedFormatJsonTestsElemFunctionsElem {
+	result := make([]generated.GeneratedFormatJsonTestsElemFunctionsElem, 0, len(functions))
 	for _, f := range functions {
-		result = append(result, generated.TestItemFunctionsElem(f))
+		result = append(result, generated.GeneratedFormatJsonTestsElemFunctionsElem(f))
 	}
 	return result
 }

@@ -37,7 +37,6 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "basic_parsing",
 			Input:    "name = John\nage = 30",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -49,7 +48,6 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "object_construction",
 			Input:    "user.name = Alice\nuser.age = 25",
-			Level:    2,
 			Features: []string{"dotted_keys"},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -67,7 +65,6 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "typed_access",
 			Input:    "count = 42\nflag = true\nrate = 3.14",
-			Level:    2,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "get_int", Args: []string{"count"}, Expect: 42},
@@ -78,7 +75,6 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "comments_support",
 			Input:    "key = value\n/= This is a comment\nother = data",
-			Level:    3,
 			Features: []string{"comments"},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -94,7 +90,6 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "advanced_features",
 			Input:    "list.0 = first\nlist.1 = second\nmultiline = line1\\nline2",
-			Level:    4,
 			Features: []string{"dotted_keys", "multiline"},
 			Tests: []loader.CompactValidation{
 				{Function: "get_list", Args: []string{"list"}, Expect: []interface{}{"first", "second"}},
@@ -354,7 +349,6 @@ func TestWorkflow_TestDataMaintenance(t *testing.T) {
 		{
 			Name:     "version1_test",
 			Input:    "key = value",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{{"key": "key", "value": "value"}}},
@@ -363,7 +357,12 @@ func TestWorkflow_TestDataMaintenance(t *testing.T) {
 	}
 
 	// Step 1: Create initial test data
-	initialData, _ := json.MarshalIndent(initialTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	initialTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  initialTests,
+	}
+	initialData, _ := json.MarshalIndent(initialTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "tests.json"), initialData, 0644); err != nil {
 		t.Fatalf("Failed to write initial tests: %v", err)
 	}
@@ -397,7 +396,6 @@ func TestWorkflow_TestDataMaintenance(t *testing.T) {
 	expandedTests := append(initialTests, loader.CompactTest{
 		Name:     "version2_test",
 		Input:    "new_key = new_value\ncount = 10",
-		Level:    1,
 		Features: []string{},
 		Tests: []loader.CompactValidation{
 			{Function: "parse", Expect: []map[string]interface{}{
@@ -422,7 +420,12 @@ func TestWorkflow_TestDataMaintenance(t *testing.T) {
 	}
 
 	// Update source data
-	expandedData, _ := json.MarshalIndent(expandedTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	expandedTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  expandedTests,
+	}
+	expandedData, _ := json.MarshalIndent(expandedTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "tests.json"), expandedData, 0644); err != nil {
 		t.Fatalf("Failed to write expanded tests: %v", err)
 	}
@@ -525,7 +528,6 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		{
 			Name:     "compatibility_test",
 			Input:    "basic = true\nadvanced = false\ncount = 42",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -541,7 +543,6 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		{
 			Name:     "feature_test",
 			Input:    "key = value\n/= comment\nother = data",
-			Level:    2,
 			Features: []string{"comments"},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -556,7 +557,12 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		},
 	}
 
-	sharedData, _ := json.MarshalIndent(sharedTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	sharedTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  sharedTests,
+	}
+	sharedData, _ := json.MarshalIndent(sharedTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "shared.json"), sharedData, 0644); err != nil {
 		t.Fatalf("Failed to write shared tests: %v", err)
 	}
@@ -716,7 +722,6 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 		{
 			Name:     "baseline_test",
 			Input:    "key = value",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{{"key": "key", "value": "value"}}},
@@ -724,7 +729,12 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 		},
 	}
 
-	baselineData, _ := json.MarshalIndent(baselineTests, "", "  ")
+	// Wrap in CompactTestFile structure for correct parsing
+	baselineTestFile := loader.CompactTestFile{
+		Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+		Tests:  baselineTests,
+	}
+	baselineData, _ := json.MarshalIndent(baselineTestFile, "", "  ")
 	if err := os.WriteFile(filepath.Join(sourceDir, "baseline.json"), baselineData, 0644); err != nil {
 		t.Fatalf("Failed to write baseline tests: %v", err)
 	}
@@ -778,7 +788,6 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 		expandedTests := append(baselineTests, loader.CompactTest{
 			Name:     "pr_addition",
 			Input:    "new_key = new_value\ncount = 5",
-			Level:    1,
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
@@ -791,7 +800,12 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 		})
 
 		// Update test data
-		expandedData, _ := json.MarshalIndent(expandedTests, "", "  ")
+		// Wrap in CompactTestFile structure for correct parsing
+		expandedTestFile := loader.CompactTestFile{
+			Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+			Tests:  expandedTests,
+		}
+		expandedData, _ := json.MarshalIndent(expandedTestFile, "", "  ")
 		if err := os.WriteFile(filepath.Join(sourceDir, "baseline.json"), expandedData, 0644); err != nil {
 			t.Fatalf("Failed to write expanded tests: %v", err)
 		}
@@ -867,7 +881,6 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 			{
 				Name:     "invalid_test",
 				Input:    "", // Invalid: empty input
-				Level:    0,  // Invalid: level 0
 				Features: []string{"nonexistent_feature"}, // Invalid feature
 				Tests: []loader.CompactValidation{
 					{Function: "nonexistent_function", Expect: "something"}, // Invalid function
@@ -875,7 +888,12 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 			},
 		}
 
-		invalidData, _ := json.MarshalIndent(invalidTests, "", "  ")
+		// Wrap in CompactTestFile structure for correct parsing
+		invalidTestFile := loader.CompactTestFile{
+			Schema: "https://schemas.ccl.example.com/compact-format/v1.0.json",
+			Tests:  invalidTests,
+		}
+		invalidData, _ := json.MarshalIndent(invalidTestFile, "", "  ")
 		if err := os.WriteFile(filepath.Join(sourceDir, "invalid.json"), invalidData, 0644); err != nil {
 			t.Fatalf("Failed to write invalid tests: %v", err)
 		}
