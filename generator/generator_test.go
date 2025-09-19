@@ -551,7 +551,6 @@ func TestFlatGenerator_ValidateGenerated_InvalidFile(t *testing.T) {
 	}
 }
 
-
 func TestFlatGenerator_ApplyFiltering_SkipFunctions(t *testing.T) {
 	sourceDir, outputDir := setupGeneratorTestData(t)
 

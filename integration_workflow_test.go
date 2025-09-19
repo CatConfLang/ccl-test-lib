@@ -242,8 +242,8 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 			SupportedFeatures: []config.CCLFeature{
 				config.FeatureExperimentalDottedKeys, // Need this for typed_access tests that may use dotted keys
 			},
-			BehaviorChoices:   []config.CCLBehavior{},
-			VariantChoice:     config.VariantProposed,
+			BehaviorChoices: []config.CCLBehavior{},
+			VariantChoice:   config.VariantProposed,
 		}
 
 		// Regenerate with typed access functions
@@ -634,7 +634,7 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		{
 			name: "typed_impl",
 			config: config.ImplementationConfig{
-				Name: "typed-ccl",
+				Name:    "typed-ccl",
 				Version: "v1.0.0",
 				SupportedFunctions: []config.CCLFunction{
 					config.FunctionParse,
@@ -649,7 +649,7 @@ func TestWorkflow_MultiProjectCompatibility(t *testing.T) {
 		{
 			name: "featured_impl",
 			config: config.ImplementationConfig{
-				Name: "featured-ccl",
+				Name:    "featured-ccl",
 				Version: "v1.0.0",
 				SupportedFunctions: []config.CCLFunction{
 					config.FunctionParse,
@@ -798,7 +798,7 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 			VariantChoice:      config.VariantProposed,
 		},
 		{
-			Name: "ci-full",
+			Name:    "ci-full",
 			Version: "v1.0.0",
 			SupportedFunctions: []config.CCLFunction{
 				config.FunctionParse,
@@ -920,7 +920,7 @@ func TestWorkflow_ContinuousIntegrationSimulation(t *testing.T) {
 		invalidTests := []loader.CompactTest{
 			{
 				Name:     "invalid_test",
-				Input:    "", // Invalid: empty input
+				Input:    "",                              // Invalid: empty input
 				Features: []string{"nonexistent_feature"}, // Invalid feature
 				Tests: []loader.CompactValidation{
 					{Function: "nonexistent_function", Expect: "something"}, // Invalid function

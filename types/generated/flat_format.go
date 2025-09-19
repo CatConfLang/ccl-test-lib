@@ -44,9 +44,6 @@ type GeneratedFormatJsonTestsElem struct {
 	// CCL input text to be tested
 	Input string `json:"input" yaml:"input" mapstructure:"input"`
 
-	// CCL implementation level (1-5)
-	Level *int `json:"level,omitempty" yaml:"level,omitempty" mapstructure:"level,omitempty"`
-
 	// Unique test name (source_name + validation function)
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
 

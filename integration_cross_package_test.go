@@ -213,10 +213,10 @@ func TestCrossPackage_ConfigCompatibilityFiltering(t *testing.T) {
 
 	// Test different compatibility configurations
 	testCases := []struct {
-		name                string
-		config              config.ImplementationConfig
-		expectedTestCount   int
-		expectedTests       []string
+		name              string
+		config            config.ImplementationConfig
+		expectedTestCount int
+		expectedTests     []string
 	}{
 		{
 			name: "minimal_support",
@@ -247,7 +247,7 @@ func TestCrossPackage_ConfigCompatibilityFiltering(t *testing.T) {
 		{
 			name: "full_support",
 			config: config.ImplementationConfig{
-				Name: "full",
+				Name:    "full",
 				Version: "v1.0.0",
 				SupportedFunctions: []config.CCLFunction{
 					config.FunctionParse,
@@ -390,7 +390,6 @@ func TestCrossPackage_StatisticsAccuracy(t *testing.T) {
 		t.Errorf("Expected %d compatible tests, got %d", expectedCompatible, stats.CompatibleTests)
 	}
 
-
 	// Verify function breakdown - after level removal, counts are based on actual validations
 	// Each source test can expand to multiple flat tests (one per validation)
 	if stats.ByFunction["parse"] < 2 {
@@ -492,8 +491,8 @@ func TestCrossPackage_ConfigValidation(t *testing.T) {
 			SupportedFunctions: []config.CCLFunction{},
 		},
 		{
-			Name:    "test",
-			Version: "v1.0.0",
+			Name:               "test",
+			Version:            "v1.0.0",
 			SupportedFunctions: []config.CCLFunction{config.FunctionParse},
 			// Conflicting behaviors (if any exist)
 			BehaviorChoices: []config.CCLBehavior{

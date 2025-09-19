@@ -73,38 +73,38 @@ func setupTestData(t *testing.T) string {
 	// Create flat format test file
 	flatTests := []types.TestCase{
 		{
-			Name:        "test_parse_parse",
-			Input:       "key = value",
-			Validation:  "parse",
-			Expected:    []map[string]interface{}{{"key": "key", "value": "value"}},
-			Functions:   []string{"parse"},
-			Features:    []string{"comments"},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  "test_parse",
+			Name:       "test_parse_parse",
+			Input:      "key = value",
+			Validation: "parse",
+			Expected:   []map[string]interface{}{{"key": "key", "value": "value"}},
+			Functions:  []string{"parse"},
+			Features:   []string{"comments"},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: "test_parse",
 		},
 		{
-			Name:        "test_parse_build_hierarchy",
-			Input:       "key = value",
-			Validation:  "build_hierarchy",
-			Expected:    map[string]interface{}{"key": "value"},
-			Functions:   []string{"build_hierarchy"},
-			Features:    []string{"comments"},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  "test_parse",
+			Name:       "test_parse_build_hierarchy",
+			Input:      "key = value",
+			Validation: "build_hierarchy",
+			Expected:   map[string]interface{}{"key": "value"},
+			Functions:  []string{"build_hierarchy"},
+			Features:   []string{"comments"},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: "test_parse",
 		},
 		{
-			Name:        "test_typed_access_get_int",
-			Input:       "count = 42\nflag = true",
-			Validation:  "get_int",
-			Expected:    42,
-			Args:        []string{"count"},
-			Functions:   []string{"get_int"},
-			Features:    []string{},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  "test_typed_access",
+			Name:       "test_typed_access_get_int",
+			Input:      "count = 42\nflag = true",
+			Validation: "get_int",
+			Expected:   42,
+			Args:       []string{"count"},
+			Functions:  []string{"get_int"},
+			Features:   []string{},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: "test_typed_access",
 		},
 	}
 
@@ -485,7 +485,6 @@ func TestTestLoader_GetTestStatistics(t *testing.T) {
 	if stats.CompatibleTests != 3 {
 		t.Errorf("Expected 3 compatible tests, got %d", stats.CompatibleTests)
 	}
-
 
 	// Check function distribution (may have multiple due to Functions metadata)
 	if stats.ByFunction["parse"] < 1 {

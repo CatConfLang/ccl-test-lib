@@ -55,7 +55,7 @@ func TestTestCase_SourceFormat(t *testing.T) {
 		Behaviors: []string{"crlf_normalize_to_lf"},
 		Variants:  []string{"proposed_behavior"},
 		Meta: TestMetadata{
-			Tags:  []string{"function:parse"},
+			Tags: []string{"function:parse"},
 		},
 	}
 
@@ -95,9 +95,8 @@ func TestTestCase_FlatFormat(t *testing.T) {
 		Features:    []string{},
 		Behaviors:   []string{},
 		Variants:    []string{},
-		Meta: TestMetadata{
-		},
-		SourceTest: "original_test",
+		Meta:        TestMetadata{},
+		SourceTest:  "original_test",
 	}
 
 	// Test marshaling

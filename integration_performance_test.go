@@ -471,15 +471,15 @@ func TestIntegration_MixedFormatHandling(t *testing.T) {
 	// Create flat format data directly
 	flatTests := []types.TestCase{
 		{
-			Name:        "flat_format_test",
-			Input:       "flat_key = flat_value",
-			Validation:  "parse",
-			Expected:    []map[string]interface{}{{"key": "flat_key", "value": "flat_value"}},
-			Functions:   []string{"parse"},
-			Features:    []string{},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  "flat_format_test",
+			Name:       "flat_format_test",
+			Input:      "flat_key = flat_value",
+			Validation: "parse",
+			Expected:   []map[string]interface{}{{"key": "flat_key", "value": "flat_value"}},
+			Functions:  []string{"parse"},
+			Features:   []string{},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: "flat_format_test",
 		},
 	}
 
@@ -564,15 +564,15 @@ func BenchmarkIntegration_LoadingPerformance(b *testing.B) {
 	flatTests := make([]types.TestCase, numTests)
 	for i := 0; i < numTests; i++ {
 		flatTests[i] = types.TestCase{
-			Name:        fmt.Sprintf("bench_test_%d", i),
-			Input:       fmt.Sprintf("key_%d = value_%d", i, i),
-			Validation:  "parse",
-			Expected:    []map[string]interface{}{{"key": fmt.Sprintf("key_%d", i), "value": fmt.Sprintf("value_%d", i)}},
-			Functions:   []string{"parse"},
-			Features:    []string{},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  fmt.Sprintf("bench_test_%d", i),
+			Name:       fmt.Sprintf("bench_test_%d", i),
+			Input:      fmt.Sprintf("key_%d = value_%d", i, i),
+			Validation: "parse",
+			Expected:   []map[string]interface{}{{"key": fmt.Sprintf("key_%d", i), "value": fmt.Sprintf("value_%d", i)}},
+			Functions:  []string{"parse"},
+			Features:   []string{},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: fmt.Sprintf("bench_test_%d", i),
 		}
 	}
 
@@ -615,15 +615,15 @@ func BenchmarkIntegration_StatisticsPerformance(b *testing.B) {
 	flatTests := make([]types.TestCase, numTests)
 	for i := 0; i < numTests; i++ {
 		flatTests[i] = types.TestCase{
-			Name:        fmt.Sprintf("stats_test_%d", i),
-			Input:       fmt.Sprintf("key_%d = value_%d", i, i),
-			Validation:  "parse",
-			Expected:    []map[string]interface{}{{"key": fmt.Sprintf("key_%d", i), "value": fmt.Sprintf("value_%d", i)}},
-			Functions:   []string{"parse"},
-			Features:    []string{},
-			Behaviors:   []string{},
-			Variants:    []string{},
-			SourceTest:  fmt.Sprintf("stats_test_%d", i),
+			Name:       fmt.Sprintf("stats_test_%d", i),
+			Input:      fmt.Sprintf("key_%d = value_%d", i, i),
+			Validation: "parse",
+			Expected:   []map[string]interface{}{{"key": fmt.Sprintf("key_%d", i), "value": fmt.Sprintf("value_%d", i)}},
+			Functions:  []string{"parse"},
+			Features:   []string{},
+			Behaviors:  []string{},
+			Variants:   []string{},
+			SourceTest: fmt.Sprintf("stats_test_%d", i),
 		}
 	}
 

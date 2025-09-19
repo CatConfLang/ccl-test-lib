@@ -75,7 +75,6 @@ func main() {
 		fmt.Printf("Total test cases: %d\n", stats.TotalTests)
 		fmt.Printf("Total assertions: %d\n", stats.TotalAssertions)
 
-
 		fmt.Println("\nCoverage by Function:")
 		for fn, count := range stats.ByFunction {
 			fmt.Printf("  %s: %d tests\n", fn, count)

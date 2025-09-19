@@ -378,7 +378,6 @@ func TestIntegration_LevelBasedFiltering(t *testing.T) {
 		t.Skip("ccl-test-data directory not found - skipping level-based filtering tests")
 	}
 
-
 	// Test progressive implementation - different capability levels
 	capabilities := []struct {
 		name      string
@@ -417,8 +416,7 @@ func TestIntegration_LevelBasedFiltering(t *testing.T) {
 		if len(tests) < previousCount {
 			t.Errorf("%s capability should have at least as many tests as previous capability (%d vs %d)",
 				cap.name, len(tests), previousCount)
-			}
-
+		}
 
 		previousCount = len(tests)
 	}

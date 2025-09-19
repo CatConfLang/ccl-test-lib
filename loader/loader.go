@@ -133,10 +133,8 @@ func (tl *TestLoader) LoadTestFile(filename string, opts LoadOptions) (*types.Te
 		}
 	}
 
-
 	return &suite, nil
 }
-
 
 // LoadTestsByFunction loads tests filtered by CCL function
 func (tl *TestLoader) LoadTestsByFunction(fn config.CCLFunction, opts LoadOptions) ([]types.TestCase, error) {
@@ -477,7 +475,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 			Behaviors: behaviors,
 			Variants:  variants,
 			Conflicts: conflicts,
-			Meta: types.TestMetadata{},
+			Meta:      types.TestMetadata{},
 		}
 
 		// Create ValidationSet from compact tests array

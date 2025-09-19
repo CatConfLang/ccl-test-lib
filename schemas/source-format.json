@@ -106,12 +106,6 @@
               "additionalProperties": false
             }
           },
-          "level": {
-            "type": "integer",
-            "description": "CCL implementation level (1-5)",
-            "minimum": 1,
-            "maximum": 5
-          },
           "features": {
             "type": "array",
             "description": "Required language features for this test",

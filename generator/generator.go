@@ -379,24 +379,8 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Gene
 	variants := fg.convertVariants(testVariants)
 	functions := fg.convertFunctions(testFunctions)
 
-	// Create a concrete struct that implements TestItem interface
-	flatTest := struct {
-		Args        []string                          `json:"args,omitempty"`
-		Behaviors   []generated.GeneratedFormatJsonTestsElemBehaviorsElem `json:"behaviors"`
-		Conflicts   *generated.GeneratedFormatJsonTestsElemConflicts      `json:"conflicts,omitempty"`
-		ErrorType   *string                           `json:"error_type,omitempty"`
-		ExpectError bool                              `json:"expect_error,omitempty"`
-		Expected    generated.GeneratedFormatJsonTestsElemExpected        `json:"expected"`
-		Features    []generated.GeneratedFormatJsonTestsElemFeaturesElem  `json:"features"`
-		Functions   []generated.GeneratedFormatJsonTestsElemFunctionsElem `json:"functions,omitempty"`
-		Input       string                            `json:"input"`
-		Level       *int                              `json:"level,omitempty"`
-		Name        string                            `json:"name"`
-		Requires    []string                          `json:"requires,omitempty"`
-		SourceTest  *string                           `json:"source_test,omitempty"`
-		Validation  generated.GeneratedFormatJsonTestsElemValidation      `json:"validation"`
-		Variants    []generated.GeneratedFormatJsonTestsElemVariantsElem  `json:"variants"`
-	}{
+	// Create the flat test directly using the generated type
+	flatTest := generated.GeneratedFormatJsonTestsElem{
 		Name:       test.Name,
 		Input:      test.Input,
 		Validation: generated.GeneratedFormatJsonTestsElemValidation(test.Validation),
@@ -409,8 +393,7 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Gene
 		SourceTest: &test.SourceTest,
 	}
 
-	// Convert to the proper interface type
-	return generated.GeneratedFormatJsonTestsElem(flatTest)
+	return flatTest
 }
 
 // getArgsForValidation returns args only for typed access functions, nil for others

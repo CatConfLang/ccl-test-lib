@@ -175,12 +175,6 @@
           "type": "string"
         }
       },
-      "level": {
-        "type": "integer",
-        "description": "CCL implementation level (1-5)",
-        "minimum": 1,
-        "maximum": 5
-      },
       "source_test": {
         "type": "string",
         "description": "Original source test name for traceability"
