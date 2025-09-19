@@ -185,7 +185,17 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		}
 
 		// Extract and populate type-safe metadata
-		flatTest.Functions, flatTest.Features = fg.GenerateMetadataFromValidation(validationName)
+		generatedFunctions, generatedFeatures := fg.GenerateMetadataFromValidation(validationName)
+		flatTest.Functions = generatedFunctions
+
+		// Merge generated features with source features, ensuring never nil
+		flatTest.Features = make([]string, 0)
+		if sourceTest.Features != nil {
+			flatTest.Features = append(flatTest.Features, sourceTest.Features...)
+		}
+		if generatedFeatures != nil {
+			flatTest.Features = append(flatTest.Features, generatedFeatures...)
+		}
 
 		// Copy behaviors and variants from source, ensuring never nil
 		if sourceTest.Behaviors != nil {

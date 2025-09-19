@@ -370,6 +370,56 @@ func TestFlatGenerator_TransformSourceToFlat_AlreadyFlat(t *testing.T) {
 	}
 }
 
+func TestFlatGenerator_TransformSourceToFlat_WithVariants(t *testing.T) {
+	sourceDir, outputDir := setupGeneratorTestData(t)
+	generator := NewFlatGenerator(sourceDir, outputDir, GenerateOptions{})
+
+	sourceTest := types.TestCase{
+		Name:  "test_with_variants",
+		Input: "key = value",
+		Validations: &types.ValidationSet{
+			Parse: []map[string]interface{}{
+				{"key": "key", "value": "value"},
+			},
+		},
+		Features:  []string{"comments"},
+		Behaviors: []string{"boolean_strict"},
+		Variants:  []string{"proposed_behavior", "reference_compliant"},
+	}
+
+	flatTests, err := generator.TransformSourceToFlat(sourceTest)
+	if err != nil {
+		t.Fatalf("Failed to transform source to flat: %v", err)
+	}
+
+	if len(flatTests) != 1 {
+		t.Errorf("Expected 1 flat test, got %d", len(flatTests))
+	}
+
+	flatTest := flatTests[0]
+
+	// Verify that variants are copied from source to flat
+	if len(flatTest.Variants) != 2 {
+		t.Errorf("Expected 2 variants, got %d: %v", len(flatTest.Variants), flatTest.Variants)
+	}
+
+	expectedVariants := []string{"proposed_behavior", "reference_compliant"}
+	for i, expected := range expectedVariants {
+		if i >= len(flatTest.Variants) || flatTest.Variants[i] != expected {
+			t.Errorf("Expected variant %s at index %d, got %v", expected, i, flatTest.Variants)
+		}
+	}
+
+	// Verify behaviors and features are also copied correctly
+	if len(flatTest.Behaviors) != 1 || flatTest.Behaviors[0] != "boolean_strict" {
+		t.Errorf("Expected behaviors [boolean_strict], got %v", flatTest.Behaviors)
+	}
+
+	if len(flatTest.Features) != 1 || flatTest.Features[0] != "comments" {
+		t.Errorf("Expected features [comments], got %v", flatTest.Features)
+	}
+}
+
 func TestFlatGenerator_GenerateMetadataFromValidation(t *testing.T) {
 	sourceDir, outputDir := setupGeneratorTestData(t)
 	generator := NewFlatGenerator(sourceDir, outputDir, GenerateOptions{})
