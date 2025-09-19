@@ -511,8 +511,8 @@ func TestTestLoader_GetCapabilityCoverage(t *testing.T) {
 		if parseCoverage.Available != 1 {
 			t.Errorf("Expected 1 available parse test, got %d", parseCoverage.Available)
 		}
-		if parseCoverage.Compatible != 3 {
-			t.Errorf("Expected 3 compatible tests overall, got %d", parseCoverage.Compatible)
+		if parseCoverage.Compatible != 1 {
+			t.Errorf("Expected 1 compatible parse test, got %d", parseCoverage.Compatible)
 		}
 	} else {
 		t.Error("Expected parse function coverage to be present")

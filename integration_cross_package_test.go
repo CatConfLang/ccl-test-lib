@@ -379,9 +379,9 @@ func TestCrossPackage_StatisticsAccuracy(t *testing.T) {
 		t.Fatalf("Failed to get statistics: %v", err)
 	}
 
-	// Expected: 5 total tests (2+2+1), 4 compatible (level 1+2 tests, no unicode support)
+	// Expected: 5 total tests (2+2+1), 3 compatible (test_level_1: parse+get_string, test_level_2: parse only, test_level_3: none due to unicode)
 	expectedTotal := 5
-	expectedCompatible := 4
+	expectedCompatible := 3
 
 	if stats.TotalTests != expectedTotal {
 		t.Errorf("Expected %d total tests, got %d", expectedTotal, stats.TotalTests)

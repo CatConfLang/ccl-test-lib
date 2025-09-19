@@ -48,7 +48,7 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "object_construction",
 			Input:    "user.name = Alice\nuser.age = 25",
-			Features: []string{"dotted_keys"},
+			Features: []string{"experimental_dotted_keys"},
 			Tests: []loader.CompactValidation{
 				{Function: "parse", Expect: []map[string]interface{}{
 					{"key": "user.name", "value": "Alice"},
@@ -64,12 +64,13 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		},
 		{
 			Name:     "typed_access",
-			Input:    "count = 42\nflag = true\nrate = 3.14",
+			Input:    "count = 42\nflag = true\nrate = 3.14\nname = John",
 			Features: []string{},
 			Tests: []loader.CompactValidation{
 				{Function: "get_int", Args: []string{"count"}, Expect: 42},
 				{Function: "get_bool", Args: []string{"flag"}, Expect: true},
 				{Function: "get_float", Args: []string{"rate"}, Expect: 3.14},
+				{Function: "get_string", Args: []string{"name"}, Expect: "John"},
 			},
 		},
 		{
@@ -90,7 +91,7 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		{
 			Name:     "advanced_features",
 			Input:    "list.0 = first\nlist.1 = second\nmultiline = line1\\nline2",
-			Features: []string{"dotted_keys", "multiline"},
+			Features: []string{"experimental_dotted_keys", "multiline"},
 			Tests: []loader.CompactValidation{
 				{Function: "get_list", Args: []string{"list"}, Expect: []interface{}{"first", "second"}},
 				{Function: "get_string", Args: []string{"multiline"}, Expect: "line1\nline2"},
@@ -144,14 +145,14 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 		}
 
 		// Should only have parse tests, no dotted keys or comments
-		expectedTests := 2 // basic_parsing parse + object_construction parse
+		expectedTests := 1 // basic_parsing parse only (object_construction filtered out due to experimental_dotted_keys feature)
 		if len(tests) != expectedTests {
 			t.Errorf("Phase 1: expected %d tests, got %d", expectedTests, len(tests))
 		}
 
 		// Verify no advanced features
 		for _, test := range tests {
-			if contains(test.Features, "dotted_keys") || contains(test.Features, "comments") {
+			if contains(test.Features, "experimental_dotted_keys") || contains(test.Features, "comments") {
 				t.Errorf("Phase 1 should not include advanced features, but test %s has features %v",
 					test.Name, test.Features)
 			}
@@ -174,9 +175,11 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 				config.FunctionParse,
 				config.FunctionBuildHierarchy,
 			},
-			SupportedFeatures: []config.CCLFeature{},
-			BehaviorChoices:   []config.CCLBehavior{},
-			VariantChoice:     config.VariantProposed,
+			SupportedFeatures: []config.CCLFeature{
+				config.FeatureExperimentalDottedKeys, // Add dotted keys support for object construction
+			},
+			BehaviorChoices: []config.CCLBehavior{},
+			VariantChoice:   config.VariantProposed,
 		}
 
 		// Regenerate with new function support
@@ -236,9 +239,27 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 				config.FunctionGetFloat,
 				config.FunctionGetString,
 			},
-			SupportedFeatures: []config.CCLFeature{},
+			SupportedFeatures: []config.CCLFeature{
+				config.FeatureExperimentalDottedKeys, // Need this for typed_access tests that may use dotted keys
+			},
 			BehaviorChoices:   []config.CCLBehavior{},
 			VariantChoice:     config.VariantProposed,
+		}
+
+		// Regenerate with typed access functions
+		gen := generator.NewFlatGenerator(sourceDir, generatedDir, generator.GenerateOptions{
+			SourceFormat: generator.FormatCompact,
+			OnlyFunctions: []config.CCLFunction{
+				config.FunctionParse,
+				config.FunctionBuildHierarchy,
+				config.FunctionGetInt,
+				config.FunctionGetBool,
+				config.FunctionGetFloat,
+				config.FunctionGetString,
+			},
+		})
+		if err := gen.GenerateAll(); err != nil {
+			t.Fatalf("Phase 3 generation failed: %v", err)
 		}
 
 		tests, err := LoadCompatibleTests(testDataDir, typedConfig)
@@ -285,9 +306,28 @@ func TestWorkflow_NewCCLImplementationDevelopment(t *testing.T) {
 			SupportedFeatures: []config.CCLFeature{
 				config.FeatureComments,
 				config.FeatureMultiline,
+				config.FeatureExperimentalDottedKeys,
 			},
 			BehaviorChoices: []config.CCLBehavior{},
 			VariantChoice:   config.VariantProposed,
+		}
+
+		// Regenerate with feature support functions
+		gen := generator.NewFlatGenerator(sourceDir, generatedDir, generator.GenerateOptions{
+			SourceFormat: generator.FormatCompact,
+			OnlyFunctions: []config.CCLFunction{
+				config.FunctionParse,
+				config.FunctionBuildHierarchy,
+				config.FunctionGetInt,
+				config.FunctionGetBool,
+				config.FunctionGetFloat,
+				config.FunctionGetString,
+				config.FunctionGetList,
+				config.FunctionFilter,
+			},
+		})
+		if err := gen.GenerateAll(); err != nil {
+			t.Fatalf("Phase 4 generation failed: %v", err)
 		}
 
 		tests, err := LoadCompatibleTests(testDataDir, featuredConfig)

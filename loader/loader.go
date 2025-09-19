@@ -348,40 +348,45 @@ func (tl *TestLoader) GetCapabilityCoverage() CapabilityCoverage {
 	// Analyze function coverage
 	for _, fn := range tl.Config.SupportedFunctions {
 		fnTests := 0
+		var functionSpecificTests []types.TestCase
 		fnStr := string(fn)
 		for _, test := range allTests {
 			if test.Validation == fnStr {
 				fnTests++
+				functionSpecificTests = append(functionSpecificTests, test)
 				continue
 			}
 			for _, testFn := range test.Functions {
 				if testFn == fnStr {
 					fnTests++
+					functionSpecificTests = append(functionSpecificTests, test)
 					break
 				}
 			}
 		}
 		coverage.Functions[fn] = CoverageInfo{
 			Available:  fnTests,
-			Compatible: len(tl.FilterCompatibleTests(allTests)),
+			Compatible: len(tl.FilterCompatibleTests(functionSpecificTests)),
 		}
 	}
 
 	// Analyze feature coverage
 	for _, feature := range tl.Config.SupportedFeatures {
 		featureTests := 0
+		var featureSpecificTests []types.TestCase
 		featureStr := string(feature)
 		for _, test := range allTests {
 			for _, testFeature := range test.Features {
 				if testFeature == featureStr {
 					featureTests++
+					featureSpecificTests = append(featureSpecificTests, test)
 					break
 				}
 			}
 		}
 		coverage.Features[feature] = CoverageInfo{
 			Available:  featureTests,
-			Compatible: len(tl.FilterCompatibleTests(allTests)),
+			Compatible: len(tl.FilterCompatibleTests(featureSpecificTests)),
 		}
 	}
 
