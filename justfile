@@ -34,6 +34,7 @@ build-examples:
 deps:
     go mod download
     go mod tidy
+    go generate tools.go
 
 # === DEVELOPMENT WORKFLOW ===
 
@@ -59,15 +60,15 @@ ci:
 
 # Run all tests
 test:
-    go test ./...
+    gotestsum
 
 # Run tests with verbose output
 test-verbose:
-    go test -v ./...
+    gotestsum --format testdox
 
 # Run tests with coverage
 test-coverage:
-    go test -cover ./...
+    gotestsum -- -cover ./...
     go test -coverprofile=coverage.out ./...
     go tool cover -html=coverage.out -o coverage.html
 
@@ -80,7 +81,6 @@ bench:
 # Format code
 format:
     go fmt ./...
-    gofmt -w .
 
 # Check if code is formatted
 format-check:
@@ -93,9 +93,8 @@ format-check:
 
 # Lint code
 lint:
-    go mod tidy
-    go fmt ./...
-    go vet ./...
+    just format
+    just vet
 
 # Advanced static analysis
 vet:
@@ -139,6 +138,7 @@ deps-graph:
 # Verify module integrity
 mod-verify:
     go mod verify
+
 
 # Update dependencies
 deps-update:
