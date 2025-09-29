@@ -30,7 +30,7 @@ type SourceTestValidation struct {
 }
 
 // FlatTest represents the structure of flat test files (*-flat.json)
-type FlatTest = generated.GeneratedFormatJson
+type FlatTest = generated.GeneratedFormatSimpleJson
 
 // FlatTestCase represents a single flattened test case
 type FlatTestCase struct {

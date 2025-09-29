@@ -115,14 +115,14 @@ func (fg *FlatGenerator) GenerateFile(sourceFile string) error {
 	flatSuite.Tests = fg.applyFiltering(flatSuite.Tests)
 
 	// Convert to generated flat format types (array of flat test cases)
-	var flatTests []generated.GeneratedFormatJsonTestsElem
+	var flatTests []generated.GeneratedFormatSimpleJsonTestsElem
 	for _, test := range flatSuite.Tests {
 		flatTest := fg.convertToFlatFormat(test)
 		flatTests = append(flatTests, flatTest)
 	}
 
 	// Create object format with $schema at top level
-	wrapper := generated.GeneratedFormatJson{
+	wrapper := generated.GeneratedFormatSimpleJson{
 		Schema: "http://json-schema.org/draft-07/schema#",
 		Tests:  flatTests,
 	}
@@ -188,7 +188,7 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		generatedFunctions, generatedFeatures := fg.GenerateMetadataFromValidation(validationName)
 		flatTest.Functions = generatedFunctions
 
-		// Merge generated features with source features, ensuring never nil
+		// Merge generated features with source features, ensuring never nil and no duplicates
 		flatTest.Features = make([]string, 0)
 		if sourceTest.Features != nil {
 			flatTest.Features = append(flatTest.Features, sourceTest.Features...)
@@ -196,6 +196,16 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		if generatedFeatures != nil {
 			flatTest.Features = append(flatTest.Features, generatedFeatures...)
 		}
+		// Remove duplicates by using a map
+		seen := make(map[string]bool)
+		uniqueFeatures := make([]string, 0, len(flatTest.Features))
+		for _, feature := range flatTest.Features {
+			if !seen[feature] {
+				seen[feature] = true
+				uniqueFeatures = append(uniqueFeatures, feature)
+			}
+		}
+		flatTest.Features = uniqueFeatures
 
 		// Copy behaviors and variants from source, ensuring never nil
 		if sourceTest.Behaviors != nil {
@@ -351,7 +361,7 @@ func (fg *FlatGenerator) validateFile(filename string) error {
 }
 
 // convertToFlatFormat converts old TestCase to generated flat format with proper Expected structure
-func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.GeneratedFormatJsonTestsElem {
+func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.GeneratedFormatSimpleJsonTestsElem {
 	// Create the proper Expected structure based on validation type
 	expected := fg.createExpectedStructure(test.Validation, test.Expected)
 
@@ -380,10 +390,10 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Gene
 	functions := fg.convertFunctions(testFunctions)
 
 	// Create the flat test directly using the generated type
-	flatTest := generated.GeneratedFormatJsonTestsElem{
+	flatTest := generated.GeneratedFormatSimpleJsonTestsElem{
 		Name:       test.Name,
 		Input:      test.Input,
-		Validation: generated.GeneratedFormatJsonTestsElemValidation(test.Validation),
+		Validation: generated.GeneratedFormatSimpleJsonTestsElemValidation(test.Validation),
 		Expected:   expected,
 		Functions:  functions,
 		Features:   features,
@@ -417,20 +427,20 @@ func (fg *FlatGenerator) getArgsForValidation(validation string, args []string) 
 }
 
 // createExpectedStructure creates the proper Expected object with Count and data fields
-func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.GeneratedFormatJsonTestsElemExpected {
-	expected := generated.GeneratedFormatJsonTestsElemExpected{}
+func (fg *FlatGenerator) createExpectedStructure(validation string, data interface{}) generated.GeneratedFormatSimpleJsonTestsElemExpected {
+	expected := generated.GeneratedFormatSimpleJsonTestsElemExpected{}
 
 	switch validation {
 	case "parse", "parse_value", "filter", "compose", "expand_dotted":
 		// These validations expect entries (key-value pairs)
 		if entries, ok := data.([]interface{}); ok {
 			expected.Count = len(entries)
-			var entryList []generated.GeneratedFormatJsonTestsElemExpectedEntriesElem
+			var entryList []generated.GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem
 			for _, entry := range entries {
 				if entryMap, ok := entry.(map[string]interface{}); ok {
 					if key, hasKey := entryMap["key"].(string); hasKey {
 						if value, hasValue := entryMap["value"].(string); hasValue {
-							entryList = append(entryList, generated.GeneratedFormatJsonTestsElemExpectedEntriesElem{
+							entryList = append(entryList, generated.GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem{
 								Key:   key,
 								Value: value,
 							})
@@ -464,34 +474,34 @@ func (fg *FlatGenerator) createExpectedStructure(validation string, data interfa
 }
 
 // Helper functions for converting enum types
-func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.GeneratedFormatJsonTestsElemBehaviorsElem {
-	result := make([]generated.GeneratedFormatJsonTestsElemBehaviorsElem, 0, len(behaviors))
+func (fg *FlatGenerator) convertBehaviors(behaviors []string) []generated.GeneratedFormatSimpleJsonTestsElemBehaviorsElem {
+	result := make([]generated.GeneratedFormatSimpleJsonTestsElemBehaviorsElem, 0, len(behaviors))
 	for _, b := range behaviors {
-		result = append(result, generated.GeneratedFormatJsonTestsElemBehaviorsElem(b))
+		result = append(result, generated.GeneratedFormatSimpleJsonTestsElemBehaviorsElem(b))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFeatures(features []string) []generated.GeneratedFormatJsonTestsElemFeaturesElem {
-	result := make([]generated.GeneratedFormatJsonTestsElemFeaturesElem, 0, len(features))
-	for _, f := range features {
-		result = append(result, generated.GeneratedFormatJsonTestsElemFeaturesElem(f))
+func (fg *FlatGenerator) convertFeatures(features []string) []string {
+	// Features is just []string in the simplified schema (no enum constraints)
+	if features == nil {
+		return make([]string, 0)
 	}
-	return result
+	return features
 }
 
-func (fg *FlatGenerator) convertVariants(variants []string) []generated.GeneratedFormatJsonTestsElemVariantsElem {
-	result := make([]generated.GeneratedFormatJsonTestsElemVariantsElem, 0, len(variants))
+func (fg *FlatGenerator) convertVariants(variants []string) []generated.GeneratedFormatSimpleJsonTestsElemVariantsElem {
+	result := make([]generated.GeneratedFormatSimpleJsonTestsElemVariantsElem, 0, len(variants))
 	for _, v := range variants {
-		result = append(result, generated.GeneratedFormatJsonTestsElemVariantsElem(v))
+		result = append(result, generated.GeneratedFormatSimpleJsonTestsElemVariantsElem(v))
 	}
 	return result
 }
 
-func (fg *FlatGenerator) convertFunctions(functions []string) []generated.GeneratedFormatJsonTestsElemFunctionsElem {
-	result := make([]generated.GeneratedFormatJsonTestsElemFunctionsElem, 0, len(functions))
+func (fg *FlatGenerator) convertFunctions(functions []string) []generated.GeneratedFormatSimpleJsonTestsElemFunctionsElem {
+	result := make([]generated.GeneratedFormatSimpleJsonTestsElemFunctionsElem, 0, len(functions))
 	for _, f := range functions {
-		result = append(result, generated.GeneratedFormatJsonTestsElemFunctionsElem(f))
+		result = append(result, generated.GeneratedFormatSimpleJsonTestsElemFunctionsElem(f))
 	}
 	return result
 }

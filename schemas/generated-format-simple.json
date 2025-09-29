@@ -1,0 +1,208 @@
+{
+  "$id": "ccl-test-flat-format",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "tests": {
+      "items": {
+        "properties": {
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "behaviors": {
+            "items": {
+              "enum": [
+                "boolean_strict",
+                "boolean_lenient",
+                "crlf_preserve_literal",
+                "crlf_normalize_to_lf",
+                "tabs_preserve",
+                "tabs_to_spaces",
+                "strict_spacing",
+                "loose_spacing",
+                "list_coercion_enabled",
+                "list_coercion_disabled"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "conflicts": {
+            "properties": {
+              "behaviors": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "features": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "functions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "variants": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "error_type": {
+            "type": "string"
+          },
+          "expect_error": {
+            "type": "boolean"
+          },
+          "expected": {
+            "properties": {
+              "count": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "entries": {
+                "items": {
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "error": {
+                "type": "boolean"
+              },
+              "list": {
+                "type": "array"
+              },
+              "object": {},
+              "value": {}
+            },
+            "required": [
+              "count"
+            ],
+            "type": "object"
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "functions": {
+            "items": {
+              "enum": [
+                "parse",
+                "parse_value",
+                "filter",
+                "compose",
+                "build_hierarchy",
+                "get_string",
+                "get_int",
+                "get_bool",
+                "get_float",
+                "get_list",
+                "canonical_format",
+                "load",
+                "round_trip",
+                "merge"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "input": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "requires": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "source_test": {
+            "type": "string"
+          },
+          "validation": {
+            "enum": [
+              "parse",
+              "parse_value",
+              "filter",
+              "compose",
+              "build_hierarchy",
+              "get_string",
+              "get_int",
+              "get_bool",
+              "get_float",
+              "get_list",
+              "canonical_format",
+              "load",
+              "round_trip",
+              "merge"
+            ],
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "enum": [
+                "proposed_behavior",
+                "reference_compliant"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "name",
+          "input",
+          "validation",
+          "expected",
+          "behaviors",
+          "variants",
+          "features"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "$schema",
+    "tests"
+  ],
+  "title": "CCL Test Flat Format",
+  "type": "object"
+}

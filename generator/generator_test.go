@@ -185,7 +185,7 @@ func TestFlatGenerator_GenerateFile_SourceFormat(t *testing.T) {
 		t.Fatalf("Failed to read output file: %v", err)
 	}
 
-	var wrapper generated.GeneratedFormatJson
+	var wrapper generated.GeneratedFormatSimpleJson
 	if err := json.Unmarshal(data, &wrapper); err != nil {
 		t.Fatalf("Failed to unmarshal generated JSON: %v", err)
 	}
@@ -230,7 +230,7 @@ func TestFlatGenerator_GenerateFile_CompactFormat(t *testing.T) {
 		t.Fatalf("Failed to read output file: %v", err)
 	}
 
-	var wrapper generated.GeneratedFormatJson
+	var wrapper generated.GeneratedFormatSimpleJson
 	if err := json.Unmarshal(data, &wrapper); err != nil {
 		t.Fatalf("Failed to unmarshal generated JSON: %v", err)
 	}

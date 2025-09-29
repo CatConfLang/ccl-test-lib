@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "ccl-test-source-format-with-schema",
-  "title": "CCL Test Source Format with Schema Support",
-  "description": "Schema for source test files (api_*.json) with $schema field support",
+  "$id": "ccl-test-source-format",
+  "title": "CCL Test Source Format",
+  "description": "Schema for source test files (api_*.json)",
   "type": "object",
   "required": ["tests"],
   "properties": {
@@ -40,9 +40,9 @@
                   "type": "string",
                   "description": "CCL function to test",
                   "enum": [
-                    "parse", "parse_value", "filter", "compose", "expand_dotted",
+                    "parse", "parse_value", "filter", "compose",
                     "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-                    "canonical_format", "load", "round_trip", "associativity"
+                    "canonical_format", "load", "round_trip", "merge"
                   ]
                 },
                 "expect": {
@@ -111,8 +111,18 @@
             "description": "Required language features for this test",
             "items": {
               "type": "string",
-              "enum": [
-                "comments", "empty_keys", "experimental_dotted_keys", "multiline", "unicode", "whitespace"
+              "oneOf": [
+                {
+                  "enum": [
+                    "comments", "empty_keys", "multiline", "unicode", "whitespace"
+                  ]
+                },
+                {
+                  "pattern": "^experimental_"
+                },
+                {
+                  "pattern": "^optional_"
+                }
               ]
             },
             "uniqueItems": true

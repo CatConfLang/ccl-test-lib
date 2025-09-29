@@ -5,8 +5,9 @@ package generated
 import "encoding/json"
 import "fmt"
 import "reflect"
+import "regexp"
 
-// Schema for source test files (api_*.json) with $schema field support
+// Schema for source test files (api_*.json)
 type SourceFormatJson struct {
 	// JSON Schema reference
 	Schema *string `json:"$schema,omitempty" yaml:"$schema,omitempty" mapstructure:"$schema,omitempty"`
@@ -23,7 +24,7 @@ type SourceFormatJsonTestsElem struct {
 	Conflicts *SourceFormatJsonTestsElemConflicts `json:"conflicts,omitempty" yaml:"conflicts,omitempty" mapstructure:"conflicts,omitempty"`
 
 	// Required language features for this test
-	Features []SourceFormatJsonTestsElemFeaturesElem `json:"features,omitempty" yaml:"features,omitempty" mapstructure:"features,omitempty"`
+	Features []string `json:"features,omitempty" yaml:"features,omitempty" mapstructure:"features,omitempty"`
 
 	// CCL input text to be tested
 	Input string `json:"input" yaml:"input" mapstructure:"input"`
@@ -65,9 +66,9 @@ var enumValues_SourceFormatJsonTestsElemBehaviorsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemBehaviorsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemBehaviorsElem) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -99,44 +100,6 @@ type SourceFormatJsonTestsElemConflicts struct {
 	Variants []string `json:"variants,omitempty" yaml:"variants,omitempty" mapstructure:"variants,omitempty"`
 }
 
-type SourceFormatJsonTestsElemFeaturesElem string
-
-const SourceFormatJsonTestsElemFeaturesElemComments SourceFormatJsonTestsElemFeaturesElem = "comments"
-const SourceFormatJsonTestsElemFeaturesElemEmptyKeys SourceFormatJsonTestsElemFeaturesElem = "empty_keys"
-const SourceFormatJsonTestsElemFeaturesElemExperimentalDottedKeys SourceFormatJsonTestsElemFeaturesElem = "experimental_dotted_keys"
-const SourceFormatJsonTestsElemFeaturesElemMultiline SourceFormatJsonTestsElemFeaturesElem = "multiline"
-const SourceFormatJsonTestsElemFeaturesElemUnicode SourceFormatJsonTestsElemFeaturesElem = "unicode"
-const SourceFormatJsonTestsElemFeaturesElemWhitespace SourceFormatJsonTestsElemFeaturesElem = "whitespace"
-
-var enumValues_SourceFormatJsonTestsElemFeaturesElem = []interface{}{
-	"comments",
-	"empty_keys",
-	"experimental_dotted_keys",
-	"multiline",
-	"unicode",
-	"whitespace",
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemFeaturesElem) UnmarshalJSON(b []byte) error {
-	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_SourceFormatJsonTestsElemFeaturesElem {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_SourceFormatJsonTestsElemFeaturesElem, v)
-	}
-	*j = SourceFormatJsonTestsElemFeaturesElem(v)
-	return nil
-}
-
 type SourceFormatJsonTestsElemTestsElem struct {
 	// Optional arguments for parameterized functions
 	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
@@ -153,11 +116,9 @@ type SourceFormatJsonTestsElemTestsElem struct {
 
 type SourceFormatJsonTestsElemTestsElemFunction string
 
-const SourceFormatJsonTestsElemTestsElemFunctionAssociativity SourceFormatJsonTestsElemTestsElemFunction = "associativity"
 const SourceFormatJsonTestsElemTestsElemFunctionBuildHierarchy SourceFormatJsonTestsElemTestsElemFunction = "build_hierarchy"
 const SourceFormatJsonTestsElemTestsElemFunctionCanonicalFormat SourceFormatJsonTestsElemTestsElemFunction = "canonical_format"
 const SourceFormatJsonTestsElemTestsElemFunctionCompose SourceFormatJsonTestsElemTestsElemFunction = "compose"
-const SourceFormatJsonTestsElemTestsElemFunctionExpandDotted SourceFormatJsonTestsElemTestsElemFunction = "expand_dotted"
 const SourceFormatJsonTestsElemTestsElemFunctionFilter SourceFormatJsonTestsElemTestsElemFunction = "filter"
 const SourceFormatJsonTestsElemTestsElemFunctionGetBool SourceFormatJsonTestsElemTestsElemFunction = "get_bool"
 const SourceFormatJsonTestsElemTestsElemFunctionGetFloat SourceFormatJsonTestsElemTestsElemFunction = "get_float"
@@ -165,6 +126,7 @@ const SourceFormatJsonTestsElemTestsElemFunctionGetInt SourceFormatJsonTestsElem
 const SourceFormatJsonTestsElemTestsElemFunctionGetList SourceFormatJsonTestsElemTestsElemFunction = "get_list"
 const SourceFormatJsonTestsElemTestsElemFunctionGetString SourceFormatJsonTestsElemTestsElemFunction = "get_string"
 const SourceFormatJsonTestsElemTestsElemFunctionLoad SourceFormatJsonTestsElemTestsElemFunction = "load"
+const SourceFormatJsonTestsElemTestsElemFunctionMerge SourceFormatJsonTestsElemTestsElemFunction = "merge"
 const SourceFormatJsonTestsElemTestsElemFunctionParse SourceFormatJsonTestsElemTestsElemFunction = "parse"
 const SourceFormatJsonTestsElemTestsElemFunctionParseValue SourceFormatJsonTestsElemTestsElemFunction = "parse_value"
 const SourceFormatJsonTestsElemTestsElemFunctionRoundTrip SourceFormatJsonTestsElemTestsElemFunction = "round_trip"
@@ -174,7 +136,6 @@ var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
 	"parse_value",
 	"filter",
 	"compose",
-	"expand_dotted",
 	"build_hierarchy",
 	"get_string",
 	"get_int",
@@ -184,13 +145,13 @@ var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
 	"canonical_format",
 	"load",
 	"round_trip",
-	"associativity",
+	"merge",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -208,9 +169,9 @@ func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(b []byte) err
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["expect"]; raw != nil && !ok {
@@ -221,7 +182,7 @@ func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJsonTestsElemTestsElem
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
 	if v, ok := raw["error"]; !ok || v == nil {
@@ -242,9 +203,9 @@ var enumValues_SourceFormatJsonTestsElemVariantsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -262,9 +223,9 @@ func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElem) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["input"]; raw != nil && !ok {
@@ -278,8 +239,11 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJsonTestsElem
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_]+$`, string(plain.Name)); !matched {
+		return fmt.Errorf("field %s pattern match: must match %s", "Name", `^[a-zA-Z0-9_]+$`)
 	}
 	if plain.Tests != nil && len(plain.Tests) < 1 {
 		return fmt.Errorf("field %s length: must be >= %d", "tests", 1)
@@ -289,9 +253,9 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJson) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJson) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["tests"]; raw != nil && !ok {
@@ -299,7 +263,7 @@ func (j *SourceFormatJson) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJson
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
 	if plain.Tests != nil && len(plain.Tests) < 1 {

@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "ccl-test-current-flat-format",
-  "title": "CCL Test Current Flat Format",
-  "description": "Schema for existing generated flat test files (*-flat.json)",
+  "$id": "ccl-test-flat-format",
+  "title": "CCL Test Flat Format",
+  "description": "Schema for existing generated flat test files",
   "type": "object",
   "required": ["$schema", "tests"],
   "properties": {
@@ -44,9 +44,9 @@
         "type": "string",
         "description": "Single CCL function to validate",
         "enum": [
-          "parse", "parse_value", "filter", "compose", "expand_dotted",
+          "parse", "parse_value", "filter", "compose",
           "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-          "canonical_format", "load", "round_trip", "associativity"
+          "canonical_format", "load", "round_trip", "merge"
         ]
       },
       "expected": {
@@ -103,9 +103,9 @@
         "items": {
           "type": "string",
           "enum": [
-            "parse", "parse_value", "filter", "compose", "expand_dotted",
+            "parse", "parse_value", "filter", "compose",
             "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-            "canonical_format", "load", "round_trip", "associativity"
+            "canonical_format", "load", "round_trip", "merge"
           ]
         }
       },
@@ -138,9 +138,19 @@
         "description": "Required language features",
         "items": {
           "type": "string",
-          "enum": [
-            "comments", "empty_keys", "experimental_dotted_keys",
-            "multiline", "unicode", "whitespace"
+          "oneOf": [
+            {
+              "enum": [
+                "comments", "empty_keys",
+                "multiline", "unicode", "whitespace"
+              ]
+            },
+            {
+              "pattern": "^experimental_"
+            },
+            {
+              "pattern": "^optional_"
+            }
           ]
         },
         "uniqueItems": true
