@@ -62,7 +62,8 @@ func (tl *TestLoader) LoadAllTests(opts LoadOptions) ([]types.TestCase, error) {
 		testDir = filepath.Join(tl.TestDataPath, "tests")
 		pattern = "*.json"
 	case FormatFlat:
-		testDir = filepath.Join(tl.TestDataPath, "generated_tests")
+		// Use TestDataPath directly - caller should provide the full path to generated_tests
+		testDir = tl.TestDataPath
 		pattern = "*.json"
 	default:
 		return nil, fmt.Errorf("unsupported test format: %v", opts.Format)
