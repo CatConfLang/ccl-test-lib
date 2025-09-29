@@ -8,28 +8,47 @@ This is `ccl-test-lib`, a Go module (`github.com/tylerbu/ccl-test-lib`) that pro
 
 ## Development Commands
 
-### Core Development
+### Essential Commands (use `just` for optimal workflow)
 ```bash
-# Build and test
-go build ./...                    # Build all packages
-go test ./...                     # Run all tests
-go mod tidy                       # Clean up dependencies
+# Quick development workflow
+just dev                          # Format, lint, generate, build, test
+just ci                           # Full CI pipeline validation
 
-# Run examples
-go run examples/basic_usage.go    # Basic library usage patterns
-go run examples/ccl-test-data_usage.go  # Test data project integration
+# Core development
+just build                        # Generate types and build all packages
+just test                         # Run tests with gotestsum
+just deps                         # Install dependencies and tools
+just generate                     # Sync schemas and generate Go types
 
-# Module management
-go mod download                   # Download dependencies
-go get -u ./...                   # Update dependencies
+# Examples and validation
+just run-examples                 # Run both usage examples
+just run-basic                    # Basic library usage patterns
+just run-ccl-data                 # Test data project integration
 ```
 
-### Testing Integration
-The library is designed to work with external test data:
+### Manual Commands (when just is unavailable)
+```bash
+# Build and test
+go generate ./...                 # Generate types from schemas
+go build ./...                    # Build all packages
+gotestsum                         # Run tests (requires gotestsum)
+go mod tidy                       # Clean up dependencies
+
+# Schema and type generation
+go run cmd/schema-sync/main.go schemas  # Sync schemas from ccl-test-data
+go run cmd/simplify-schema/main.go <input> <output>  # Create go-jsonschema compatible schemas
+```
+
+### Integration Requirements
+The library requires external test data and tools:
 ```bash
 # Expected directory structure for integration
 ../ccl-test-data/tests/           # Source format (maintainable)
 ../ccl-test-data/generated-tests/ # Flat format (implementation-friendly)
+
+# Required tools (installed via `just deps`)
+gotestsum                         # Enhanced test runner
+go-jsonschema                     # Generate Go types from JSON schemas
 ```
 
 ## Architecture Overview
@@ -118,32 +137,69 @@ stats, err := ccl.GetTestStats(".", config.ImplementationConfig{...})
 - **`loader/loader.go`** - Advanced loading with custom filtering options
 - **`generator/generator.go`** - Source-to-flat transformation with generation options
 
-### Usage Examples
-- **`examples/basic_usage.go`** - Standard implementation integration patterns
-- **`examples/ccl-test-data_usage.go`** - Test data project usage patterns
+### Schema and Code Generation
+- **`schemas/`** - JSON Schema definitions for test formats
+  - `source-format.json` - Human-maintainable multi-validation format
+  - `generated-format.json` - Implementation-friendly single-validation format
+  - `generated-format-simple.json` - Simplified schema for go-jsonschema compatibility
+- **`types/generated/`** - Auto-generated Go types from JSON schemas
+  - `source_format.go` - Types for source test format
+  - `flat_format.go` - Types for flat test format (simplified schema)
+- **`cmd/schema-sync/`** - Tool to sync schemas from ccl-test-data repository
+- **`cmd/simplify-schema/`** - Tool to create go-jsonschema compatible schemas
 
-### Migration Support
+### Usage Examples
+- **`examples/basic/basic_usage.go`** - Standard implementation integration patterns
+- **`examples/ccl-test-data/ccl-test-data_usage.go`** - Test data project usage patterns
+
+### Development Tools
+- **`justfile`** - Complete development workflow automation
+- **`tools.go`** - Go tool dependency management and installation
 - **`MIGRATION.md`** - Detailed migration guide for existing CCL projects
 - **`README.md`** - Quick start guide and API overview
 
 ## Development Notes
 
+### Schema-Driven Development Workflow
+1. **Schema Definition**: JSON schemas in `schemas/` define test format contracts
+2. **Type Generation**: `go generate ./...` creates Go types from schemas using go-jsonschema
+3. **Dual Schema Strategy**:
+   - `generated-format.json` - Full schema with strict enum validation
+   - `generated-format-simple.json` - Simplified schema for go-jsonschema compatibility
+4. **Automatic Sync**: `cmd/schema-sync` pulls latest schemas from ccl-test-data repository
+
 ### Type Safety Philosophy
 This library replaces error-prone string parsing with Go type constants:
 - `config.CCLFunction` instead of parsing `"function:parse"` tags
-- `config.CCLFeature` instead of parsing `"feature:comments"` tags  
+- `config.CCLFeature` instead of parsing `"feature:comments"` tags
 - Direct field access (`test.Validation`) instead of tag string manipulation
+- Auto-generated types ensure compile-time validation of JSON schema compliance
+
+### Schema Simplification for Go Generation
+The `cmd/simplify-schema` tool addresses go-jsonschema limitations:
+- Removes `allOf`, `anyOf`, `oneOf` conditional logic
+- Strips `if`/`then`/`else` conditional validation
+- Converts strict enum arrays to plain string arrays for broader compatibility
+- Preserves core validation while enabling clean Go struct generation
 
 ### Backward Compatibility
 - Supports legacy tag-based filtering during migration periods
 - Handles both array and suite JSON formats for flat tests
 - Graceful degradation when test data directories are unavailable
+- Dual schema approach maintains strict validation while supporting code generation
 
 ### Performance Considerations
 - Flat format optimized for direct field access (no string parsing)
 - Capability filtering happens at load time, not runtime
 - Batch operations for multi-file generation and loading
+- Generated types eliminate runtime reflection and string parsing overhead
 
 ## Testing Strategy
 
 The library itself has minimal test files but is designed to work with external CCL test suites. Integration testing relies on the `../ccl-test-data` directory structure. Examples demonstrate usage patterns and can serve as integration validation.
+
+### Running Tests
+- Use `just test` for enhanced test output with gotestsum
+- Use `just test-coverage` for coverage analysis with HTML reports
+- Use `just run-examples` to validate both usage patterns
+- Integration tests verify compatibility with external ccl-test-data repository
