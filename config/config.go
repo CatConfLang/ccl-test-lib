@@ -29,7 +29,7 @@ type CCLFunction string
 
 const (
 	FunctionParse          CCLFunction = "parse"
-	FunctionParseValue     CCLFunction = "parse_value"
+	FunctionParseDedented  CCLFunction = "parse_dedented"
 	FunctionFilter         CCLFunction = "filter"
 	FunctionCombine        CCLFunction = "combine"
 	FunctionExpandDotted   CCLFunction = "expand_dotted"
@@ -46,7 +46,7 @@ const (
 func AllFunctions() []CCLFunction {
 	return []CCLFunction{
 		FunctionParse,
-		FunctionParseValue,
+		FunctionParseDedented,
 		FunctionFilter,
 		FunctionCombine,
 		FunctionExpandDotted,

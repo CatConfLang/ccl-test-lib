@@ -158,7 +158,7 @@ func TestConflictSet_JSONHandling(t *testing.T) {
 func TestValidationSet_AllFields(t *testing.T) {
 	validations := ValidationSet{
 		Parse:          []Entry{{Key: "key", Value: "value"}},
-		ParseValue:     "value",
+		ParseDedented:  "value",
 		Filter:         []Entry{{Key: "key", Value: "value"}},
 		Combine:        []Entry{{Key: "key", Value: "combined"}},
 		ExpandDotted:   []Entry{{Key: "foo.bar", Value: "expanded"}},

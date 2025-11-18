@@ -85,9 +85,9 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemBehaviorsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemBehaviorsElem) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemBehaviorsElem) UnmarshalJSON(b []byte) error {
 	var v string
-	if err := json.Unmarshal(value, &v); err != nil {
+	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -147,9 +147,9 @@ type GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem struct {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(value, &raw); err != nil {
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["key"]; raw != nil && !ok {
@@ -160,7 +160,7 @@ func (j *GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem) UnmarshalJSON(va
 	}
 	type Plain GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem
 	var plain Plain
-	if err := json.Unmarshal(value, &plain); err != nil {
+	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
 	}
 	*j = GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem(plain)
@@ -168,9 +168,9 @@ func (j *GeneratedFormatSimpleJsonTestsElemExpectedEntriesElem) UnmarshalJSON(va
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemExpected) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemExpected) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(value, &raw); err != nil {
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["count"]; raw != nil && !ok {
@@ -178,11 +178,8 @@ func (j *GeneratedFormatSimpleJsonTestsElemExpected) UnmarshalJSON(value []byte)
 	}
 	type Plain GeneratedFormatSimpleJsonTestsElemExpected
 	var plain Plain
-	if err := json.Unmarshal(value, &plain); err != nil {
+	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
-	}
-	if 0 > plain.Count {
-		return fmt.Errorf("field %s: must be >= %v", "count", 0)
 	}
 	*j = GeneratedFormatSimpleJsonTestsElemExpected(plain)
 	return nil
@@ -202,12 +199,12 @@ const GeneratedFormatSimpleJsonTestsElemFunctionsElemGetString GeneratedFormatSi
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemLoad GeneratedFormatSimpleJsonTestsElemFunctionsElem = "load"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemMerge GeneratedFormatSimpleJsonTestsElemFunctionsElem = "merge"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemParse GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse"
-const GeneratedFormatSimpleJsonTestsElemFunctionsElemParseValue GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse_value"
+const GeneratedFormatSimpleJsonTestsElemFunctionsElemParseDedented GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse_dedented"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemRoundTrip GeneratedFormatSimpleJsonTestsElemFunctionsElem = "round_trip"
 
 var enumValues_GeneratedFormatSimpleJsonTestsElemFunctionsElem = []interface{}{
 	"parse",
-	"parse_value",
+	"parse_dedented",
 	"filter",
 	"compose",
 	"build_hierarchy",
@@ -223,9 +220,9 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemFunctionsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemFunctionsElem) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemFunctionsElem) UnmarshalJSON(b []byte) error {
 	var v string
-	if err := json.Unmarshal(value, &v); err != nil {
+	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -256,12 +253,12 @@ const GeneratedFormatSimpleJsonTestsElemValidationGetString GeneratedFormatSimpl
 const GeneratedFormatSimpleJsonTestsElemValidationLoad GeneratedFormatSimpleJsonTestsElemValidation = "load"
 const GeneratedFormatSimpleJsonTestsElemValidationMerge GeneratedFormatSimpleJsonTestsElemValidation = "merge"
 const GeneratedFormatSimpleJsonTestsElemValidationParse GeneratedFormatSimpleJsonTestsElemValidation = "parse"
-const GeneratedFormatSimpleJsonTestsElemValidationParseValue GeneratedFormatSimpleJsonTestsElemValidation = "parse_value"
+const GeneratedFormatSimpleJsonTestsElemValidationParseDedented GeneratedFormatSimpleJsonTestsElemValidation = "parse_dedented"
 const GeneratedFormatSimpleJsonTestsElemValidationRoundTrip GeneratedFormatSimpleJsonTestsElemValidation = "round_trip"
 
 var enumValues_GeneratedFormatSimpleJsonTestsElemValidation = []interface{}{
 	"parse",
-	"parse_value",
+	"parse_dedented",
 	"filter",
 	"compose",
 	"build_hierarchy",
@@ -277,9 +274,9 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemValidation = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemValidation) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemValidation) UnmarshalJSON(b []byte) error {
 	var v string
-	if err := json.Unmarshal(value, &v); err != nil {
+	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -307,9 +304,9 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemVariantsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElemVariantsElem) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElemVariantsElem) UnmarshalJSON(b []byte) error {
 	var v string
-	if err := json.Unmarshal(value, &v); err != nil {
+	if err := json.Unmarshal(b, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -327,9 +324,9 @@ func (j *GeneratedFormatSimpleJsonTestsElemVariantsElem) UnmarshalJSON(value []b
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(value, &raw); err != nil {
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["behaviors"]; raw != nil && !ok {
@@ -355,7 +352,7 @@ func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(value []byte) error {
 	}
 	type Plain GeneratedFormatSimpleJsonTestsElem
 	var plain Plain
-	if err := json.Unmarshal(value, &plain); err != nil {
+	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
 	}
 	*j = GeneratedFormatSimpleJsonTestsElem(plain)
@@ -363,9 +360,9 @@ func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(value []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *GeneratedFormatSimpleJson) UnmarshalJSON(value []byte) error {
+func (j *GeneratedFormatSimpleJson) UnmarshalJSON(b []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(value, &raw); err != nil {
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["$schema"]; raw != nil && !ok {
@@ -376,7 +373,7 @@ func (j *GeneratedFormatSimpleJson) UnmarshalJSON(value []byte) error {
 	}
 	type Plain GeneratedFormatSimpleJson
 	var plain Plain
-	if err := json.Unmarshal(value, &plain); err != nil {
+	if err := json.Unmarshal(b, &plain); err != nil {
 		return err
 	}
 	if plain.Tests != nil && len(plain.Tests) < 1 {
