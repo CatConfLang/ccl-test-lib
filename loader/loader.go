@@ -489,8 +489,8 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 			switch test.Function {
 			case "parse":
 				validations.Parse = validationValue
-			case "parse_dedented":
-				validations.ParseDedented = validationValue
+			case "parse_indented":
+				validations.ParseIndented = validationValue
 			case "filter":
 				validations.Filter = validationValue
 			case "combine":
@@ -574,7 +574,7 @@ func (tl *TestLoader) extractExpectedValue(validation string, expected interface
 
 	// Extract the appropriate field based on validation type
 	switch validation {
-	case "parse", "parse_dedented", "filter", "compose", "expand_dotted":
+	case "parse", "parse_indented", "filter", "compose", "expand_dotted":
 		// These expect entries
 		if entries, ok := expectedMap["entries"]; ok {
 			return entries

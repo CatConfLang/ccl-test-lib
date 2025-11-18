@@ -199,12 +199,12 @@ const GeneratedFormatSimpleJsonTestsElemFunctionsElemGetString GeneratedFormatSi
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemLoad GeneratedFormatSimpleJsonTestsElemFunctionsElem = "load"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemMerge GeneratedFormatSimpleJsonTestsElemFunctionsElem = "merge"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemParse GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse"
-const GeneratedFormatSimpleJsonTestsElemFunctionsElemParseDedented GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse_dedented"
+const GeneratedFormatSimpleJsonTestsElemFunctionsElemParseIndented GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse_indented"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemRoundTrip GeneratedFormatSimpleJsonTestsElemFunctionsElem = "round_trip"
 
 var enumValues_GeneratedFormatSimpleJsonTestsElemFunctionsElem = []interface{}{
 	"parse",
-	"parse_dedented",
+	"parse_indented",
 	"filter",
 	"compose",
 	"build_hierarchy",
@@ -253,12 +253,12 @@ const GeneratedFormatSimpleJsonTestsElemValidationGetString GeneratedFormatSimpl
 const GeneratedFormatSimpleJsonTestsElemValidationLoad GeneratedFormatSimpleJsonTestsElemValidation = "load"
 const GeneratedFormatSimpleJsonTestsElemValidationMerge GeneratedFormatSimpleJsonTestsElemValidation = "merge"
 const GeneratedFormatSimpleJsonTestsElemValidationParse GeneratedFormatSimpleJsonTestsElemValidation = "parse"
-const GeneratedFormatSimpleJsonTestsElemValidationParseDedented GeneratedFormatSimpleJsonTestsElemValidation = "parse_dedented"
+const GeneratedFormatSimpleJsonTestsElemValidationParseIndented GeneratedFormatSimpleJsonTestsElemValidation = "parse_indented"
 const GeneratedFormatSimpleJsonTestsElemValidationRoundTrip GeneratedFormatSimpleJsonTestsElemValidation = "round_trip"
 
 var enumValues_GeneratedFormatSimpleJsonTestsElemValidation = []interface{}{
 	"parse",
-	"parse_dedented",
+	"parse_indented",
 	"filter",
 	"compose",
 	"build_hierarchy",

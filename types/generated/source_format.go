@@ -127,12 +127,12 @@ const SourceFormatJsonTestsElemTestsElemFunctionGetString SourceFormatJsonTestsE
 const SourceFormatJsonTestsElemTestsElemFunctionLoad SourceFormatJsonTestsElemTestsElemFunction = "load"
 const SourceFormatJsonTestsElemTestsElemFunctionMerge SourceFormatJsonTestsElemTestsElemFunction = "merge"
 const SourceFormatJsonTestsElemTestsElemFunctionParse SourceFormatJsonTestsElemTestsElemFunction = "parse"
-const SourceFormatJsonTestsElemTestsElemFunctionParseDedented SourceFormatJsonTestsElemTestsElemFunction = "parse_dedented"
+const SourceFormatJsonTestsElemTestsElemFunctionParseIndented SourceFormatJsonTestsElemTestsElemFunction = "parse_indented"
 const SourceFormatJsonTestsElemTestsElemFunctionRoundTrip SourceFormatJsonTestsElemTestsElemFunction = "round_trip"
 
 var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
 	"parse",
-	"parse_dedented",
+	"parse_indented",
 	"filter",
 	"compose",
 	"build_hierarchy",

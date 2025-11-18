@@ -65,7 +65,7 @@ func TestAllFunctions_Completeness(t *testing.T) {
 	// Verify all expected functions are present
 	expectedFunctions := []CCLFunction{
 		FunctionParse,
-		FunctionParseDedented,
+		FunctionParseIndented,
 		FunctionFilter,
 		FunctionCombine,
 		FunctionExpandDotted,
@@ -481,7 +481,7 @@ func TestCCLFunction_StringValues(t *testing.T) {
 		expected string
 	}{
 		{FunctionParse, "parse"},
-		{FunctionParseDedented, "parse_dedented"},
+		{FunctionParseIndented, "parse_indented"},
 		{FunctionFilter, "filter"},
 		{FunctionCombine, "combine"},
 		{FunctionExpandDotted, "expand_dotted"},
