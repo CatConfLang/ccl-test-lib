@@ -431,7 +431,7 @@ func (fg *FlatGenerator) createExpectedStructure(validation string, data interfa
 	expected := generated.GeneratedFormatSimpleJsonTestsElemExpected{}
 
 	switch validation {
-	case "parse", "parse_dedented", "filter", "compose", "expand_dotted":
+	case "parse", "parse_indented", "filter", "compose", "expand_dotted":
 		// These validations expect entries (key-value pairs)
 		if entries, ok := data.([]interface{}); ok {
 			expected.Count = len(entries)

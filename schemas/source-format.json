@@ -40,7 +40,7 @@
                   "type": "string",
                   "description": "CCL function to test",
                   "enum": [
-                    "parse", "parse_dedented", "filter", "compose",
+                    "parse", "parse_indented", "filter", "compose",
                     "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
                     "canonical_format", "load", "round_trip", "merge"
                   ]

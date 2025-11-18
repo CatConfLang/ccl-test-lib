@@ -78,7 +78,7 @@ type CCLFunction string
 
 const (
 	FunctionParse           CCLFunction = "parse"
-	FunctionParseDedented   CCLFunction = "parse_dedented"
+	FunctionParseIndented   CCLFunction = "parse_indented"
 	FunctionFilter          CCLFunction = "filter"
 	FunctionCompose         CCLFunction = "compose"
 	FunctionExpandDotted    CCLFunction = "expand_dotted"
