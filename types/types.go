@@ -53,7 +53,7 @@ type ConflictSet struct {
 // ValidationSet contains all possible validations (source format)
 type ValidationSet struct {
 	Parse          interface{} `json:"parse,omitempty"`
-	ParseValue     interface{} `json:"parse_value,omitempty"`
+	ParseDedented  interface{} `json:"parse_dedented,omitempty"`
 	Filter         interface{} `json:"filter,omitempty"`
 	Combine        interface{} `json:"combine,omitempty"`
 	ExpandDotted   interface{} `json:"expand_dotted,omitempty"`

@@ -44,7 +44,7 @@
         "type": "string",
         "description": "Single CCL function to validate",
         "enum": [
-          "parse", "parse_value", "filter", "compose",
+          "parse", "parse_dedented", "filter", "compose",
           "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
           "canonical_format", "load", "round_trip", "merge"
         ]
@@ -103,7 +103,7 @@
         "items": {
           "type": "string",
           "enum": [
-            "parse", "parse_value", "filter", "compose",
+            "parse", "parse_dedented", "filter", "compose",
             "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
             "canonical_format", "load", "round_trip", "merge"
           ]
