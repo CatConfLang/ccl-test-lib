@@ -43,8 +43,8 @@ go run cmd/simplify-schema/main.go <input> <output>  # Create go-jsonschema comp
 The library requires external test data and tools:
 ```bash
 # Expected directory structure for integration
-../ccl-test-data/tests/           # Source format (maintainable)
-../ccl-test-data/generated-tests/ # Flat format (implementation-friendly)
+../ccl-test-data/source_tests/    # Source format (maintainable)
+../ccl-test-data/generated_tests/ # Flat format (implementation-friendly)
 
 # Required tools (installed via `just deps`)
 gotestsum                         # Enhanced test runner
@@ -63,8 +63,8 @@ go-jsonschema                     # Generate Go types from JSON schemas
 ### Core Design Patterns
 
 #### Dual-Format Architecture
-- **Source Format** (`tests/*.json`): Human-maintainable with multiple validations per test case
-- **Flat Format** (`generated-tests/*.json`): Implementation-friendly with single validation per test case
+- **Source Format** (`source_tests/*.json`): Human-maintainable with multiple validations per test case
+- **Flat Format** (`generated_tests/*.json`): Implementation-friendly with single validation per test case
 - **1:N Transformation**: One source test → multiple flat tests (one per validation type)
 
 #### Type-Safe Capability System
@@ -122,7 +122,7 @@ case "build_hierarchy": runBuildHierarchyTest(test)
 #### For Test Data Projects (ccl-test-data)
 ```go
 // 1. Generate flat format from source
-err := ccl.GenerateFlat("tests", "generated-tests")
+err := ccl.GenerateFlat("source_tests", "generated_tests")
 
 // 2. Get comprehensive statistics
 stats, err := ccl.GetTestStats(".", config.ImplementationConfig{...})

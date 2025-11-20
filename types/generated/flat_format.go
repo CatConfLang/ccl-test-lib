@@ -197,7 +197,6 @@ const GeneratedFormatSimpleJsonTestsElemFunctionsElemGetInt GeneratedFormatSimpl
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemGetList GeneratedFormatSimpleJsonTestsElemFunctionsElem = "get_list"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemGetString GeneratedFormatSimpleJsonTestsElemFunctionsElem = "get_string"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemLoad GeneratedFormatSimpleJsonTestsElemFunctionsElem = "load"
-const GeneratedFormatSimpleJsonTestsElemFunctionsElemMerge GeneratedFormatSimpleJsonTestsElemFunctionsElem = "merge"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemParse GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemParseIndented GeneratedFormatSimpleJsonTestsElemFunctionsElem = "parse_indented"
 const GeneratedFormatSimpleJsonTestsElemFunctionsElemRoundTrip GeneratedFormatSimpleJsonTestsElemFunctionsElem = "round_trip"
@@ -216,7 +215,6 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemFunctionsElem = []interface{}{
 	"canonical_format",
 	"load",
 	"round_trip",
-	"merge",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -251,7 +249,6 @@ const GeneratedFormatSimpleJsonTestsElemValidationGetInt GeneratedFormatSimpleJs
 const GeneratedFormatSimpleJsonTestsElemValidationGetList GeneratedFormatSimpleJsonTestsElemValidation = "get_list"
 const GeneratedFormatSimpleJsonTestsElemValidationGetString GeneratedFormatSimpleJsonTestsElemValidation = "get_string"
 const GeneratedFormatSimpleJsonTestsElemValidationLoad GeneratedFormatSimpleJsonTestsElemValidation = "load"
-const GeneratedFormatSimpleJsonTestsElemValidationMerge GeneratedFormatSimpleJsonTestsElemValidation = "merge"
 const GeneratedFormatSimpleJsonTestsElemValidationParse GeneratedFormatSimpleJsonTestsElemValidation = "parse"
 const GeneratedFormatSimpleJsonTestsElemValidationParseIndented GeneratedFormatSimpleJsonTestsElemValidation = "parse_indented"
 const GeneratedFormatSimpleJsonTestsElemValidationRoundTrip GeneratedFormatSimpleJsonTestsElemValidation = "round_trip"
@@ -270,7 +267,6 @@ var enumValues_GeneratedFormatSimpleJsonTestsElemValidation = []interface{}{
 	"canonical_format",
 	"load",
 	"round_trip",
-	"merge",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

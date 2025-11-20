@@ -436,7 +436,7 @@ func TestIntegration_ConcurrentOperations(t *testing.T) {
 
 func TestIntegration_MixedFormatHandling(t *testing.T) {
 	tmpDir := t.TempDir()
-	testsDir := filepath.Join(tmpDir, "tests")
+	testsDir := filepath.Join(tmpDir, "source_tests")
 	generatedDir := filepath.Join(tmpDir, "generated_tests")
 
 	if err := os.MkdirAll(testsDir, 0755); err != nil {

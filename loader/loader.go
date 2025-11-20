@@ -31,7 +31,7 @@ type TestFormat int
 
 const (
 	FormatCompact TestFormat = iota // source_tests/*.json (compact arrays)
-	FormatFlat                      // generated-tests/ (implementation-friendly)
+	FormatFlat                      // generated_tests/ (implementation-friendly)
 )
 
 // FilterMode specifies how tests should be filtered
@@ -59,11 +59,10 @@ func (tl *TestLoader) LoadAllTests(opts LoadOptions) ([]types.TestCase, error) {
 
 	switch opts.Format {
 	case FormatCompact:
-		testDir = filepath.Join(tl.TestDataPath, "tests")
+		testDir = filepath.Join(tl.TestDataPath, "source_tests")
 		pattern = "*.json"
 	case FormatFlat:
-		// Use TestDataPath directly - caller should provide the full path to generated_tests
-		testDir = tl.TestDataPath
+		testDir = filepath.Join(tl.TestDataPath, "generated_tests")
 		pattern = "*.json"
 	default:
 		return nil, fmt.Errorf("unsupported test format: %v", opts.Format)

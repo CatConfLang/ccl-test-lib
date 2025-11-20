@@ -87,13 +87,13 @@ for _, test := range tests {
 
 ```go
 // Simple generation
-err := ccl.GenerateFlat("tests", "generated-tests")
+err := ccl.GenerateFlat("source_tests", "generated_tests")
 if err != nil {
     log.Fatal(err)
 }
 
 // Advanced generation with options
-gen := generator.NewFlatGenerator("tests", "generated-tests", generator.GenerateOptions{
+gen := generator.NewFlatGenerator("source_tests", "generated_tests", generator.GenerateOptions{
     SkipPropertyTests: false,
     OnlyFunctions: []config.CCLFunction{
         config.FunctionParse,
@@ -124,7 +124,7 @@ err := gen.GenerateAll()
 
 ## Test Formats
 
-### Source Format (tests/*.json)
+### Source Format (source_tests/*.json)
 Human-maintainable with multiple validations per test case. Example:
 ```json
 {
@@ -137,7 +137,7 @@ Human-maintainable with multiple validations per test case. Example:
 }
 ```
 
-### Flat Format (generated-tests/*.json)  
+### Flat Format (generated_tests/*.json)
 Implementation-friendly with single validation per test case. Example:
 ```json
 {

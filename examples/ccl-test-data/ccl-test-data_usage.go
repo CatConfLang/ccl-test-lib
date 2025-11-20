@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("\n--- Generating Flat Format ---")
 
 	// Basic generation
-	err := ccl.GenerateFlat("../ccl-test-data/tests", "../ccl-test-data/generated-tests-new")
+	err := ccl.GenerateFlat("../ccl-test-data/source_tests", "../ccl-test-data/generated_tests_new")
 	if err != nil {
 		log.Printf("Warning: basic generation failed: %v", err)
 		fmt.Println("(This is expected if ccl-test-data source directory structure is different)")
@@ -27,7 +27,7 @@ func main() {
 
 	// Advanced generation with filtering
 	fmt.Println("\n--- Advanced Generation ---")
-	gen := generator.NewFlatGenerator("../ccl-test-data/tests", "../ccl-test-data/generated-tests-filtered", generator.GenerateOptions{
+	gen := generator.NewFlatGenerator("../ccl-test-data/source_tests", "../ccl-test-data/generated_tests_filtered", generator.GenerateOptions{
 		OnlyFunctions: []config.CCLFunction{
 			config.FunctionParse,
 			config.FunctionBuildHierarchy,

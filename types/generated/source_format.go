@@ -125,7 +125,6 @@ const SourceFormatJsonTestsElemTestsElemFunctionGetInt SourceFormatJsonTestsElem
 const SourceFormatJsonTestsElemTestsElemFunctionGetList SourceFormatJsonTestsElemTestsElemFunction = "get_list"
 const SourceFormatJsonTestsElemTestsElemFunctionGetString SourceFormatJsonTestsElemTestsElemFunction = "get_string"
 const SourceFormatJsonTestsElemTestsElemFunctionLoad SourceFormatJsonTestsElemTestsElemFunction = "load"
-const SourceFormatJsonTestsElemTestsElemFunctionMerge SourceFormatJsonTestsElemTestsElemFunction = "merge"
 const SourceFormatJsonTestsElemTestsElemFunctionParse SourceFormatJsonTestsElemTestsElemFunction = "parse"
 const SourceFormatJsonTestsElemTestsElemFunctionParseIndented SourceFormatJsonTestsElemTestsElemFunction = "parse_indented"
 const SourceFormatJsonTestsElemTestsElemFunctionRoundTrip SourceFormatJsonTestsElemTestsElemFunction = "round_trip"
@@ -144,7 +143,6 @@ var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
 	"canonical_format",
 	"load",
 	"round_trip",
-	"merge",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.

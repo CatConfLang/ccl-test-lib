@@ -131,8 +131,7 @@
                 "get_list",
                 "canonical_format",
                 "load",
-                "round_trip",
-                "merge"
+                "round_trip"
               ],
               "type": "string"
             },
@@ -167,8 +166,7 @@
               "get_list",
               "canonical_format",
               "load",
-              "round_trip",
-              "merge"
+              "round_trip"
             ],
             "type": "string"
           },

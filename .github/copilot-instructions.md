@@ -123,7 +123,7 @@ go generate tools.go    # Install dev tools (gotestsum, go-jsonschema)
 
 ### 1. Dual-Format Architecture
 
-**Source Format** (`tests/*.json`)
+**Source Format** (`source_tests/*.json`)
 - Human-maintainable JSON files
 - Multiple validations per test case
 - Example:
@@ -138,7 +138,7 @@ go generate tools.go    # Install dev tools (gotestsum, go-jsonschema)
   }
   ```
 
-**Flat Format** (`generated-tests/*.json`)
+**Flat Format** (`generated_tests/*.json`)
 - Implementation-friendly JSON files
 - Single validation per test case (1:N transformation)
 - Direct field access, no string parsing needed
@@ -203,10 +203,10 @@ Transform source format to flat format:
 
 ```go
 // Simple generation
-err := ccl.GenerateFlat("tests", "generated-tests")
+err := ccl.GenerateFlat("source_tests", "generated_tests")
 
 // Advanced with options
-gen := generator.NewFlatGenerator("tests", "generated-tests", 
+gen := generator.NewFlatGenerator("source_tests", "generated_tests", 
     generator.GenerateOptions{
         SkipPropertyTests: false,
         OnlyFunctions: []config.CCLFunction{
