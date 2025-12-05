@@ -12,11 +12,12 @@ type TestSuite struct {
 
 // TestCase supports both source (multi-validation) and flat (single-validation) formats
 type TestCase struct {
-	Name   string `json:"name"`
-	Input  string `json:"input,omitempty"`
-	Input1 string `json:"input1,omitempty"` // For composition tests
-	Input2 string `json:"input2,omitempty"`
-	Input3 string `json:"input3,omitempty"`
+	Name   string   `json:"name"`
+	Input  string   `json:"input,omitempty"`
+	Inputs []string `json:"inputs,omitempty"` // Multiple inputs for algebraic property tests
+	Input1 string   `json:"input1,omitempty"` // For composition tests (legacy)
+	Input2 string   `json:"input2,omitempty"`
+	Input3 string   `json:"input3,omitempty"`
 
 	// Source format: multiple validations
 	Validations *ValidationSet `json:"validations,omitempty"`

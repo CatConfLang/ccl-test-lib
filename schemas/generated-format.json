@@ -15,7 +15,11 @@
       "minItems": 1,
       "items": {
     "type": "object",
-    "required": ["name", "input", "validation", "expected", "behaviors", "variants", "features"],
+    "required": ["name", "validation", "expected", "behaviors", "variants", "features"],
+    "oneOf": [
+      { "required": ["input"] },
+      { "required": ["inputs"] }
+    ],
     "allOf": [
       {
         "if": {
@@ -38,7 +42,13 @@
       },
       "input": {
         "type": "string",
-        "description": "CCL input text to be tested"
+        "description": "CCL input text to be tested (single input)"
+      },
+      "inputs": {
+        "type": "array",
+        "description": "Multiple inputs for algebraic property tests",
+        "items": { "type": "string" },
+        "minItems": 2
       },
       "validation": {
         "type": "string",
@@ -46,7 +56,8 @@
         "enum": [
           "parse", "parse_indented", "filter", "compose",
           "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-          "canonical_format", "load", "round_trip"
+          "print", "canonical_format", "load", "round_trip",
+          "compose_associative", "identity_left", "identity_right"
         ]
       },
       "expected": {
@@ -82,6 +93,14 @@
             "type": "array",
             "description": "Expected list for list access functions"
           },
+          "text": {
+            "type": "string",
+            "description": "Expected text output for print function"
+          },
+          "boolean": {
+            "type": "boolean",
+            "description": "Expected boolean result for algebraic property tests"
+          },
           "error": {
             "type": "boolean",
             "description": "Whether this should produce an error",
@@ -105,7 +124,8 @@
           "enum": [
             "parse", "parse_indented", "filter", "compose",
             "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-            "canonical_format", "load", "round_trip"
+            "print", "canonical_format", "load", "round_trip",
+            "compose_associative", "identity_left", "identity_right"
           ]
         }
       },
@@ -119,7 +139,8 @@
             "crlf_preserve_literal", "crlf_normalize_to_lf",
             "tabs_preserve", "tabs_to_spaces",
             "strict_spacing", "loose_spacing",
-            "list_coercion_enabled", "list_coercion_disabled"
+            "list_coercion_enabled", "list_coercion_disabled",
+            "array_order_insertion", "array_order_lexicographic"
           ]
         },
         "uniqueItems": true

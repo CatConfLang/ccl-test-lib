@@ -12,7 +12,8 @@ type SourceTest = generated.SourceFormatJson
 // SourceTestCase represents a single test case from source files
 type SourceTestCase struct {
 	Name      string                 `json:"name"`
-	Input     string                 `json:"input"`
+	Input     string                 `json:"input,omitempty"`
+	Inputs    []string               `json:"inputs,omitempty"` // Multiple inputs for algebraic property tests
 	Tests     []SourceTestValidation `json:"tests"`
 	Level     *int                   `json:"level,omitempty"`
 	Features  []string               `json:"features,omitempty"`
@@ -35,7 +36,8 @@ type FlatTest = generated.GeneratedFormatSimpleJson
 // FlatTestCase represents a single flattened test case
 type FlatTestCase struct {
 	Name        string         `json:"name"`
-	Input       string         `json:"input"`
+	Input       string         `json:"input,omitempty"`
+	Inputs      []string       `json:"inputs,omitempty"` // Multiple inputs for algebraic property tests
 	Validation  string         `json:"validation"`
 	Expected    ExpectedResult `json:"expected"`
 	Args        []string       `json:"args,omitempty"`

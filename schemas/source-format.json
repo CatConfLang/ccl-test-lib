@@ -8,8 +8,7 @@
   "properties": {
     "$schema": {
       "type": "string",
-      "description": "JSON Schema reference",
-      "format": "uri"
+      "description": "JSON Schema reference (relative path to schema file)"
     },
     "tests": {
       "type": "array",
@@ -17,7 +16,11 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "input", "tests"],
+        "required": ["name", "tests"],
+        "oneOf": [
+          { "required": ["input"] },
+          { "required": ["inputs"] }
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -26,7 +29,13 @@
           },
           "input": {
             "type": "string",
-            "description": "CCL input text to be tested"
+            "description": "CCL input text to be tested (single input)"
+          },
+          "inputs": {
+            "type": "array",
+            "description": "Multiple inputs for algebraic property tests",
+            "items": { "type": "string" },
+            "minItems": 2
           },
           "tests": {
             "type": "array",
@@ -42,7 +51,8 @@
                   "enum": [
                     "parse", "parse_indented", "filter", "compose",
                     "build_hierarchy", "get_string", "get_int", "get_bool", "get_float", "get_list",
-                    "canonical_format", "load", "round_trip"
+                    "print", "canonical_format", "load", "round_trip",
+                    "compose_associative", "identity_left", "identity_right"
                   ]
                 },
                 "expect": {
@@ -137,7 +147,8 @@
                 "crlf_preserve_literal", "crlf_normalize_to_lf",
                 "tabs_preserve", "tabs_to_spaces",
                 "strict_spacing", "loose_spacing",
-                "list_coercion_enabled", "list_coercion_disabled"
+                "list_coercion_enabled", "list_coercion_disabled",
+                "array_order_insertion", "array_order_lexicographic"
               ]
             },
             "uniqueItems": true

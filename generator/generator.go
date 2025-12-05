@@ -173,6 +173,7 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		flatTest := types.TestCase{
 			Name:        fmt.Sprintf("%s_%s", sourceTest.Name, validationName),
 			Input:       sourceTest.Input,
+			Inputs:      sourceTest.Inputs,
 			Input1:      sourceTest.Input1,
 			Input2:      sourceTest.Input2,
 			Input3:      sourceTest.Input3,
@@ -380,9 +381,16 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Gene
 	functions := fg.convertFunctions(testFunctions)
 
 	// Create the flat test directly using the generated type
+	// Note: Input is *string in generated type since it's optional in schema
+	// Use Input or Inputs depending on which is set (they're mutually exclusive)
+	var inputPtr *string
+	if test.Input != "" {
+		inputPtr = &test.Input
+	}
 	flatTest := generated.GeneratedFormatSimpleJsonTestsElem{
 		Name:       test.Name,
-		Input:      test.Input,
+		Input:      inputPtr,
+		Inputs:     test.Inputs,
 		Validation: generated.GeneratedFormatSimpleJsonTestsElemValidation(test.Validation),
 		Expected:   expected,
 		Functions:  functions,
@@ -606,8 +614,8 @@ var behaviorFunctionMap = map[string][]string{
 	"crlf_normalize_to_lf":  {"parse", "parse_indented", "canonical_format", "load"},
 
 	// Tab handling affects parsing, formatting, and hierarchy building functions
-	"tabs_preserve":   {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
-	"tabs_to_spaces":  {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+	"tabs_preserve":  {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+	"tabs_to_spaces": {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
 
 	// Spacing behavior affects parsing
 	"strict_spacing": {"parse", "parse_indented"},

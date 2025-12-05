@@ -26,7 +26,9 @@
                 "strict_spacing",
                 "loose_spacing",
                 "list_coercion_enabled",
-                "list_coercion_disabled"
+                "list_coercion_disabled",
+                "array_order_insertion",
+                "array_order_lexicographic"
               ],
               "type": "string"
             },
@@ -73,6 +75,9 @@
           },
           "expected": {
             "properties": {
+              "boolean": {
+                "type": "boolean"
+              },
               "count": {
                 "minimum": 0,
                 "type": "integer"
@@ -102,6 +107,9 @@
                 "type": "array"
               },
               "object": {},
+              "text": {
+                "type": "string"
+              },
               "value": {}
             },
             "required": [
@@ -129,9 +137,13 @@
                 "get_bool",
                 "get_float",
                 "get_list",
+                "print",
                 "canonical_format",
                 "load",
-                "round_trip"
+                "round_trip",
+                "compose_associative",
+                "identity_left",
+                "identity_right"
               ],
               "type": "string"
             },
@@ -139,6 +151,13 @@
           },
           "input": {
             "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array"
           },
           "name": {
             "type": "string"
@@ -164,9 +183,13 @@
               "get_bool",
               "get_float",
               "get_list",
+              "print",
               "canonical_format",
               "load",
-              "round_trip"
+              "round_trip",
+              "compose_associative",
+              "identity_left",
+              "identity_right"
             ],
             "type": "string"
           },
@@ -184,7 +207,6 @@
         },
         "required": [
           "name",
-          "input",
           "validation",
           "expected",
           "behaviors",

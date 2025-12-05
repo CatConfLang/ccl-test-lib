@@ -5,10 +5,11 @@ package generated
 import "encoding/json"
 import "fmt"
 import "reflect"
+import "regexp"
 
 // Schema for source test files (api_*.json)
 type SourceFormatJson struct {
-	// JSON Schema reference
+	// JSON Schema reference (relative path to schema file)
 	Schema *string `json:"$schema,omitempty" yaml:"$schema,omitempty" mapstructure:"$schema,omitempty"`
 
 	// Array of test cases
@@ -25,8 +26,11 @@ type SourceFormatJsonTestsElem struct {
 	// Required language features for this test
 	Features []string `json:"features,omitempty" yaml:"features,omitempty" mapstructure:"features,omitempty"`
 
-	// CCL input text to be tested
-	Input string `json:"input" yaml:"input" mapstructure:"input"`
+	// CCL input text to be tested (single input)
+	Input *string `json:"input,omitempty" yaml:"input,omitempty" mapstructure:"input,omitempty"`
+
+	// Multiple inputs for algebraic property tests
+	Inputs []string `json:"inputs,omitempty" yaml:"inputs,omitempty" mapstructure:"inputs,omitempty"`
 
 	// Unique test name identifier
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
@@ -40,6 +44,8 @@ type SourceFormatJsonTestsElem struct {
 
 type SourceFormatJsonTestsElemBehaviorsElem string
 
+const SourceFormatJsonTestsElemBehaviorsElemArrayOrderInsertion SourceFormatJsonTestsElemBehaviorsElem = "array_order_insertion"
+const SourceFormatJsonTestsElemBehaviorsElemArrayOrderLexicographic SourceFormatJsonTestsElemBehaviorsElem = "array_order_lexicographic"
 const SourceFormatJsonTestsElemBehaviorsElemBooleanLenient SourceFormatJsonTestsElemBehaviorsElem = "boolean_lenient"
 const SourceFormatJsonTestsElemBehaviorsElemBooleanStrict SourceFormatJsonTestsElemBehaviorsElem = "boolean_strict"
 const SourceFormatJsonTestsElemBehaviorsElemCrlfNormalizeToLf SourceFormatJsonTestsElemBehaviorsElem = "crlf_normalize_to_lf"
@@ -62,12 +68,14 @@ var enumValues_SourceFormatJsonTestsElemBehaviorsElem = []interface{}{
 	"loose_spacing",
 	"list_coercion_enabled",
 	"list_coercion_disabled",
+	"array_order_insertion",
+	"array_order_lexicographic",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemBehaviorsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemBehaviorsElem) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -118,15 +126,19 @@ type SourceFormatJsonTestsElemTestsElemFunction string
 const SourceFormatJsonTestsElemTestsElemFunctionBuildHierarchy SourceFormatJsonTestsElemTestsElemFunction = "build_hierarchy"
 const SourceFormatJsonTestsElemTestsElemFunctionCanonicalFormat SourceFormatJsonTestsElemTestsElemFunction = "canonical_format"
 const SourceFormatJsonTestsElemTestsElemFunctionCompose SourceFormatJsonTestsElemTestsElemFunction = "compose"
+const SourceFormatJsonTestsElemTestsElemFunctionComposeAssociative SourceFormatJsonTestsElemTestsElemFunction = "compose_associative"
 const SourceFormatJsonTestsElemTestsElemFunctionFilter SourceFormatJsonTestsElemTestsElemFunction = "filter"
 const SourceFormatJsonTestsElemTestsElemFunctionGetBool SourceFormatJsonTestsElemTestsElemFunction = "get_bool"
 const SourceFormatJsonTestsElemTestsElemFunctionGetFloat SourceFormatJsonTestsElemTestsElemFunction = "get_float"
 const SourceFormatJsonTestsElemTestsElemFunctionGetInt SourceFormatJsonTestsElemTestsElemFunction = "get_int"
 const SourceFormatJsonTestsElemTestsElemFunctionGetList SourceFormatJsonTestsElemTestsElemFunction = "get_list"
 const SourceFormatJsonTestsElemTestsElemFunctionGetString SourceFormatJsonTestsElemTestsElemFunction = "get_string"
+const SourceFormatJsonTestsElemTestsElemFunctionIdentityLeft SourceFormatJsonTestsElemTestsElemFunction = "identity_left"
+const SourceFormatJsonTestsElemTestsElemFunctionIdentityRight SourceFormatJsonTestsElemTestsElemFunction = "identity_right"
 const SourceFormatJsonTestsElemTestsElemFunctionLoad SourceFormatJsonTestsElemTestsElemFunction = "load"
 const SourceFormatJsonTestsElemTestsElemFunctionParse SourceFormatJsonTestsElemTestsElemFunction = "parse"
 const SourceFormatJsonTestsElemTestsElemFunctionParseIndented SourceFormatJsonTestsElemTestsElemFunction = "parse_indented"
+const SourceFormatJsonTestsElemTestsElemFunctionPrint SourceFormatJsonTestsElemTestsElemFunction = "print"
 const SourceFormatJsonTestsElemTestsElemFunctionRoundTrip SourceFormatJsonTestsElemTestsElemFunction = "round_trip"
 
 var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
@@ -140,15 +152,19 @@ var enumValues_SourceFormatJsonTestsElemTestsElemFunction = []interface{}{
 	"get_bool",
 	"get_float",
 	"get_list",
+	"print",
 	"canonical_format",
 	"load",
 	"round_trip",
+	"compose_associative",
+	"identity_left",
+	"identity_right",
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -166,9 +182,9 @@ func (j *SourceFormatJsonTestsElemTestsElemFunction) UnmarshalJSON(b []byte) err
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["expect"]; raw != nil && !ok {
@@ -179,7 +195,7 @@ func (j *SourceFormatJsonTestsElemTestsElem) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJsonTestsElemTestsElem
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
 	if v, ok := raw["error"]; !ok || v == nil {
@@ -200,9 +216,9 @@ var enumValues_SourceFormatJsonTestsElemVariantsElem = []interface{}{
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(value []byte) error {
 	var v string
-	if err := json.Unmarshal(b, &v); err != nil {
+	if err := json.Unmarshal(value, &v); err != nil {
 		return err
 	}
 	var ok bool
@@ -220,13 +236,10 @@ func (j *SourceFormatJsonTestsElemVariantsElem) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJsonTestsElem) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
-	}
-	if _, ok := raw["input"]; raw != nil && !ok {
-		return fmt.Errorf("field input in SourceFormatJsonTestsElem: required")
 	}
 	if _, ok := raw["name"]; raw != nil && !ok {
 		return fmt.Errorf("field name in SourceFormatJsonTestsElem: required")
@@ -236,8 +249,14 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJsonTestsElem
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if plain.Inputs != nil && len(plain.Inputs) < 2 {
+		return fmt.Errorf("field %s length: must be >= %d", "inputs", 2)
+	}
+	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_]+$`, string(plain.Name)); !matched {
+		return fmt.Errorf("field %s pattern match: must match %s", "Name", `^[a-zA-Z0-9_]+$`)
 	}
 	if plain.Tests != nil && len(plain.Tests) < 1 {
 		return fmt.Errorf("field %s length: must be >= %d", "tests", 1)
@@ -247,9 +266,9 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *SourceFormatJson) UnmarshalJSON(b []byte) error {
+func (j *SourceFormatJson) UnmarshalJSON(value []byte) error {
 	var raw map[string]interface{}
-	if err := json.Unmarshal(b, &raw); err != nil {
+	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
 	if _, ok := raw["tests"]; raw != nil && !ok {
@@ -257,7 +276,7 @@ func (j *SourceFormatJson) UnmarshalJSON(b []byte) error {
 	}
 	type Plain SourceFormatJson
 	var plain Plain
-	if err := json.Unmarshal(b, &plain); err != nil {
+	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
 	if plain.Tests != nil && len(plain.Tests) < 1 {
