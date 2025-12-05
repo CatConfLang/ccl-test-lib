@@ -207,30 +207,20 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		}
 		flatTest.Features = uniqueFeatures
 
-		// Copy behaviors and variants from source, ensuring never nil
-		if sourceTest.Behaviors != nil {
-			flatTest.Behaviors = sourceTest.Behaviors
-		} else {
-			flatTest.Behaviors = make([]string, 0)
-		}
+		// Filter behaviors to only include those relevant to this validation function.
+		// This ensures function-specific behaviors (like boolean_strict/lenient) are
+		// only tagged on functions where they actually affect behavior.
+		flatTest.Behaviors = filterBehaviorsForFunction(sourceTest.Behaviors, validationName)
+
+		// Copy variants from source, ensuring never nil
 		if sourceTest.Variants != nil {
 			flatTest.Variants = sourceTest.Variants
 		} else {
 			flatTest.Variants = make([]string, 0)
 		}
 
-		// Only set conflicts if they exist and are non-empty
-		if sourceTest.Conflicts != nil {
-			// Check if the ConflictSet has any actual conflicts
-			hasConflicts := len(sourceTest.Conflicts.Functions) > 0 ||
-				len(sourceTest.Conflicts.Behaviors) > 0 ||
-				len(sourceTest.Conflicts.Variants) > 0 ||
-				len(sourceTest.Conflicts.Features) > 0
-			if hasConflicts {
-				flatTest.Conflicts = sourceTest.Conflicts
-			}
-			// If no conflicts, leave flatTest.Conflicts as nil (omitted)
-		}
+		// Filter conflicts to only include behavior conflicts relevant to this function
+		flatTest.Conflicts = filterConflictsForFunction(sourceTest.Conflicts, validationName)
 
 		// Validation components are already parsed and applied above
 		// No special case handling needed - all validation types are handled uniformly
@@ -596,4 +586,91 @@ func expectErrorFromValue(value interface{}) bool {
 			strings.Contains(strings.ToLower(str), "invalid")
 	}
 	return false
+}
+
+// behaviorFunctionMap defines which behaviors apply to which functions.
+// Behaviors not listed here apply to all functions (global behaviors).
+// This mapping ensures that function-specific behaviors like boolean_strict/lenient
+// are only tagged on the functions where they actually affect behavior.
+var behaviorFunctionMap = map[string][]string{
+	// Boolean parsing behavior only affects get_bool
+	"boolean_strict":  {"get_bool"},
+	"boolean_lenient": {"get_bool"},
+
+	// List coercion only affects get_list
+	"list_coercion_enabled":  {"get_list"},
+	"list_coercion_disabled": {"get_list"},
+
+	// CRLF handling affects parsing and formatting functions
+	"crlf_preserve_literal": {"parse", "parse_indented", "canonical_format", "load"},
+	"crlf_normalize_to_lf":  {"parse", "parse_indented", "canonical_format", "load"},
+
+	// Tab handling affects parsing, formatting, and hierarchy building functions
+	"tabs_preserve":   {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+	"tabs_to_spaces":  {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+
+	// Spacing behavior affects parsing
+	"strict_spacing": {"parse", "parse_indented"},
+	"loose_spacing":  {"parse", "parse_indented"},
+
+	// Array ordering affects hierarchy building and list access
+	"array_order_insertion":     {"build_hierarchy", "get_list"},
+	"array_order_lexicographic": {"build_hierarchy", "get_list"},
+}
+
+// filterBehaviorsForFunction filters behaviors to only include those relevant
+// to the given validation function. Behaviors not in behaviorFunctionMap are
+// considered global and always included.
+func filterBehaviorsForFunction(behaviors []string, validationName string) []string {
+	if behaviors == nil {
+		return make([]string, 0)
+	}
+
+	filtered := make([]string, 0, len(behaviors))
+	for _, behavior := range behaviors {
+		applicableFunctions, hasMapping := behaviorFunctionMap[behavior]
+		if !hasMapping {
+			// Behavior not in map = global behavior, always include
+			filtered = append(filtered, behavior)
+			continue
+		}
+
+		// Check if this validation function is in the applicable list
+		for _, fn := range applicableFunctions {
+			if fn == validationName {
+				filtered = append(filtered, behavior)
+				break
+			}
+		}
+	}
+
+	return filtered
+}
+
+// filterConflictsForFunction filters conflict behaviors to only include those
+// relevant to the given validation function.
+func filterConflictsForFunction(conflicts *types.ConflictSet, validationName string) *types.ConflictSet {
+	if conflicts == nil {
+		return nil
+	}
+
+	// Filter behavior conflicts
+	filteredBehaviors := filterBehaviorsForFunction(conflicts.Behaviors, validationName)
+
+	// Check if we still have any conflicts after filtering
+	hasConflicts := len(conflicts.Functions) > 0 ||
+		len(filteredBehaviors) > 0 ||
+		len(conflicts.Variants) > 0 ||
+		len(conflicts.Features) > 0
+
+	if !hasConflicts {
+		return nil
+	}
+
+	return &types.ConflictSet{
+		Functions: conflicts.Functions,
+		Behaviors: filteredBehaviors,
+		Variants:  conflicts.Variants,
+		Features:  conflicts.Features,
+	}
 }

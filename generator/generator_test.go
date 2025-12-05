@@ -383,7 +383,7 @@ func TestFlatGenerator_TransformSourceToFlat_WithVariants(t *testing.T) {
 			},
 		},
 		Features:  []string{"comments"},
-		Behaviors: []string{"boolean_strict"},
+		Behaviors: []string{"crlf_normalize_to_lf"}, // Use a behavior that applies to parse
 		Variants:  []string{"proposed_behavior", "reference_compliant"},
 	}
 
@@ -410,13 +410,70 @@ func TestFlatGenerator_TransformSourceToFlat_WithVariants(t *testing.T) {
 		}
 	}
 
-	// Verify behaviors and features are also copied correctly
-	if len(flatTest.Behaviors) != 1 || flatTest.Behaviors[0] != "boolean_strict" {
-		t.Errorf("Expected behaviors [boolean_strict], got %v", flatTest.Behaviors)
+	// Verify behaviors are filtered correctly - crlf_normalize_to_lf applies to parse
+	if len(flatTest.Behaviors) != 1 || flatTest.Behaviors[0] != "crlf_normalize_to_lf" {
+		t.Errorf("Expected behaviors [crlf_normalize_to_lf], got %v", flatTest.Behaviors)
 	}
 
 	if len(flatTest.Features) != 1 || flatTest.Features[0] != "comments" {
 		t.Errorf("Expected features [comments], got %v", flatTest.Features)
+	}
+}
+
+func TestFlatGenerator_BehaviorFiltering(t *testing.T) {
+	sourceDir, outputDir := setupGeneratorTestData(t)
+	generator := NewFlatGenerator(sourceDir, outputDir, GenerateOptions{})
+
+	// Test that boolean_strict only applies to get_bool, not parse
+	sourceTest := types.TestCase{
+		Name:  "test_boolean_behavior_filtering",
+		Input: "enabled = true",
+		Validations: &types.ValidationSet{
+			Parse: []map[string]interface{}{
+				{"key": "enabled", "value": "true"},
+			},
+			GetBool: map[string]interface{}{
+				"args":   []string{"enabled"},
+				"expect": true,
+			},
+		},
+		Behaviors: []string{"boolean_strict"},
+	}
+
+	flatTests, err := generator.TransformSourceToFlat(sourceTest)
+	if err != nil {
+		t.Fatalf("Failed to transform source to flat: %v", err)
+	}
+
+	if len(flatTests) != 2 {
+		t.Fatalf("Expected 2 flat tests, got %d", len(flatTests))
+	}
+
+	// Find the parse and get_bool tests
+	var parseTest, getBoolTest *types.TestCase
+	for i := range flatTests {
+		if flatTests[i].Validation == "parse" {
+			parseTest = &flatTests[i]
+		} else if flatTests[i].Validation == "get_bool" {
+			getBoolTest = &flatTests[i]
+		}
+	}
+
+	if parseTest == nil {
+		t.Fatal("Expected to find parse test")
+	}
+	if getBoolTest == nil {
+		t.Fatal("Expected to find get_bool test")
+	}
+
+	// parse should NOT have boolean_strict (it's not relevant to parsing)
+	if len(parseTest.Behaviors) != 0 {
+		t.Errorf("parse test should have no behaviors, got %v", parseTest.Behaviors)
+	}
+
+	// get_bool SHOULD have boolean_strict
+	if len(getBoolTest.Behaviors) != 1 || getBoolTest.Behaviors[0] != "boolean_strict" {
+		t.Errorf("get_bool test should have [boolean_strict], got %v", getBoolTest.Behaviors)
 	}
 }
 
