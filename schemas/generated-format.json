@@ -15,11 +15,7 @@
       "minItems": 1,
       "items": {
     "type": "object",
-    "required": ["name", "validation", "expected", "behaviors", "variants", "features"],
-    "oneOf": [
-      { "required": ["input"] },
-      { "required": ["inputs"] }
-    ],
+    "required": ["name", "inputs", "validation", "expected", "behaviors", "variants", "features"],
     "allOf": [
       {
         "if": {
@@ -40,15 +36,11 @@
         "description": "Unique test name (source_name + validation function)",
         "pattern": "^[a-zA-Z0-9_]+$"
       },
-      "input": {
-        "type": "string",
-        "description": "CCL input text to be tested (single input)"
-      },
       "inputs": {
         "type": "array",
-        "description": "Multiple inputs for algebraic property tests",
+        "description": "CCL input text(s) to be tested. Single-input tests use a 1-element array.",
         "items": { "type": "string" },
-        "minItems": 2
+        "minItems": 1
       },
       "validation": {
         "type": "string",

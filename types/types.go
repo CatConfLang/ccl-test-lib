@@ -13,11 +13,7 @@ type TestSuite struct {
 // TestCase supports both source (multi-validation) and flat (single-validation) formats
 type TestCase struct {
 	Name   string   `json:"name"`
-	Input  string   `json:"input,omitempty"`
-	Inputs []string `json:"inputs,omitempty"` // Multiple inputs for algebraic property tests
-	Input1 string   `json:"input1,omitempty"` // For composition tests (legacy)
-	Input2 string   `json:"input2,omitempty"`
-	Input3 string   `json:"input3,omitempty"`
+	Inputs []string `json:"inputs"` // CCL input text(s) - single-input tests use 1-element array
 
 	// Source format: multiple validations
 	Validations *ValidationSet `json:"validations,omitempty"`
@@ -53,21 +49,23 @@ type ConflictSet struct {
 
 // ValidationSet contains all possible validations (source format)
 type ValidationSet struct {
-	Parse          interface{} `json:"parse,omitempty"`
-	ParseIndented  interface{} `json:"parse_indented,omitempty"`
-	Filter         interface{} `json:"filter,omitempty"`
-	Combine        interface{} `json:"combine,omitempty"`
-	ExpandDotted   interface{} `json:"expand_dotted,omitempty"`
-	BuildHierarchy interface{} `json:"build_hierarchy,omitempty"`
-	GetString      interface{} `json:"get_string,omitempty"`
-	GetInt         interface{} `json:"get_int,omitempty"`
-	GetBool        interface{} `json:"get_bool,omitempty"`
-	GetFloat       interface{} `json:"get_float,omitempty"`
-	GetList        interface{} `json:"get_list,omitempty"`
-	PrettyPrint    interface{} `json:"pretty_print,omitempty"`
-	RoundTrip      interface{} `json:"round_trip,omitempty"`
-	Associativity  interface{} `json:"associativity,omitempty"`
-	Canonical      interface{} `json:"canonical_format,omitempty"`
+	Parse              interface{} `json:"parse,omitempty"`
+	ParseIndented      interface{} `json:"parse_indented,omitempty"`
+	Filter             interface{} `json:"filter,omitempty"`
+	Combine            interface{} `json:"combine,omitempty"`
+	ExpandDotted       interface{} `json:"expand_dotted,omitempty"`
+	BuildHierarchy     interface{} `json:"build_hierarchy,omitempty"`
+	GetString          interface{} `json:"get_string,omitempty"`
+	GetInt             interface{} `json:"get_int,omitempty"`
+	GetBool            interface{} `json:"get_bool,omitempty"`
+	GetFloat           interface{} `json:"get_float,omitempty"`
+	GetList            interface{} `json:"get_list,omitempty"`
+	PrettyPrint        interface{} `json:"pretty_print,omitempty"`
+	RoundTrip          interface{} `json:"round_trip,omitempty"`
+	Canonical          interface{} `json:"canonical_format,omitempty"`
+	ComposeAssociative interface{} `json:"compose_associative,omitempty"`
+	IdentityLeft       interface{} `json:"identity_left,omitempty"`
+	IdentityRight      interface{} `json:"identity_right,omitempty"`
 }
 
 // TestMetadata contains categorization and legacy tag support

@@ -39,11 +39,8 @@ type GeneratedFormatSimpleJsonTestsElem struct {
 	// Functions corresponds to the JSON schema field "functions".
 	Functions []GeneratedFormatSimpleJsonTestsElemFunctionsElem `json:"functions,omitempty" yaml:"functions,omitempty" mapstructure:"functions,omitempty"`
 
-	// Input corresponds to the JSON schema field "input".
-	Input *string `json:"input,omitempty" yaml:"input,omitempty" mapstructure:"input,omitempty"`
-
 	// Inputs corresponds to the JSON schema field "inputs".
-	Inputs []string `json:"inputs,omitempty" yaml:"inputs,omitempty" mapstructure:"inputs,omitempty"`
+	Inputs []string `json:"inputs" yaml:"inputs" mapstructure:"inputs"`
 
 	// Name corresponds to the JSON schema field "name".
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
@@ -366,6 +363,9 @@ func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["features"]; raw != nil && !ok {
 		return fmt.Errorf("field features in GeneratedFormatSimpleJsonTestsElem: required")
 	}
+	if _, ok := raw["inputs"]; raw != nil && !ok {
+		return fmt.Errorf("field inputs in GeneratedFormatSimpleJsonTestsElem: required")
+	}
 	if _, ok := raw["name"]; raw != nil && !ok {
 		return fmt.Errorf("field name in GeneratedFormatSimpleJsonTestsElem: required")
 	}
@@ -380,8 +380,8 @@ func (j *GeneratedFormatSimpleJsonTestsElem) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
-	if plain.Inputs != nil && len(plain.Inputs) < 2 {
-		return fmt.Errorf("field %s length: must be >= %d", "inputs", 2)
+	if plain.Inputs != nil && len(plain.Inputs) < 1 {
+		return fmt.Errorf("field %s length: must be >= %d", "inputs", 1)
 	}
 	*j = GeneratedFormatSimpleJsonTestsElem(plain)
 	return nil

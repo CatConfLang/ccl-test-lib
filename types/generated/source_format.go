@@ -26,11 +26,8 @@ type SourceFormatJsonTestsElem struct {
 	// Required language features for this test
 	Features []string `json:"features,omitempty" yaml:"features,omitempty" mapstructure:"features,omitempty"`
 
-	// CCL input text to be tested (single input)
-	Input *string `json:"input,omitempty" yaml:"input,omitempty" mapstructure:"input,omitempty"`
-
-	// Multiple inputs for algebraic property tests
-	Inputs []string `json:"inputs,omitempty" yaml:"inputs,omitempty" mapstructure:"inputs,omitempty"`
+	// CCL input text(s) to be tested. Single-input tests use a 1-element array.
+	Inputs []string `json:"inputs" yaml:"inputs" mapstructure:"inputs"`
 
 	// Unique test name identifier
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
@@ -241,6 +238,9 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
+	if _, ok := raw["inputs"]; raw != nil && !ok {
+		return fmt.Errorf("field inputs in SourceFormatJsonTestsElem: required")
+	}
 	if _, ok := raw["name"]; raw != nil && !ok {
 		return fmt.Errorf("field name in SourceFormatJsonTestsElem: required")
 	}
@@ -252,8 +252,8 @@ func (j *SourceFormatJsonTestsElem) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
-	if plain.Inputs != nil && len(plain.Inputs) < 2 {
-		return fmt.Errorf("field %s length: must be >= %d", "inputs", 2)
+	if plain.Inputs != nil && len(plain.Inputs) < 1 {
+		return fmt.Errorf("field %s length: must be >= %d", "inputs", 1)
 	}
 	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9_]+$`, string(plain.Name)); !matched {
 		return fmt.Errorf("field %s pattern match: must match %s", "Name", `^[a-zA-Z0-9_]+$`)

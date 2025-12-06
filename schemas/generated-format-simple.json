@@ -149,14 +149,11 @@
             },
             "type": "array"
           },
-          "input": {
-            "type": "string"
-          },
           "inputs": {
             "items": {
               "type": "string"
             },
-            "minItems": 2,
+            "minItems": 1,
             "type": "array"
           },
           "name": {
@@ -207,6 +204,7 @@
         },
         "required": [
           "name",
+          "inputs",
           "validation",
           "expected",
           "behaviors",

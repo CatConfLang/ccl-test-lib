@@ -172,11 +172,7 @@ func (fg *FlatGenerator) TransformSourceToFlat(sourceTest types.TestCase) ([]typ
 		// Create flat test for this validation
 		flatTest := types.TestCase{
 			Name:        fmt.Sprintf("%s_%s", sourceTest.Name, validationName),
-			Input:       sourceTest.Input,
 			Inputs:      sourceTest.Inputs,
-			Input1:      sourceTest.Input1,
-			Input2:      sourceTest.Input2,
-			Input3:      sourceTest.Input3,
 			Validation:  validationName,
 			Expected:    validationComponents.Expected,
 			Args:        validationComponents.Args,
@@ -381,15 +377,8 @@ func (fg *FlatGenerator) convertToFlatFormat(test types.TestCase) generated.Gene
 	functions := fg.convertFunctions(testFunctions)
 
 	// Create the flat test directly using the generated type
-	// Note: Input is *string in generated type since it's optional in schema
-	// Use Input or Inputs depending on which is set (they're mutually exclusive)
-	var inputPtr *string
-	if test.Input != "" {
-		inputPtr = &test.Input
-	}
 	flatTest := generated.GeneratedFormatSimpleJsonTestsElem{
 		Name:       test.Name,
-		Input:      inputPtr,
 		Inputs:     test.Inputs,
 		Validation: generated.GeneratedFormatSimpleJsonTestsElemValidation(test.Validation),
 		Expected:   expected,

@@ -412,7 +412,7 @@ type CompactTestFile struct {
 // CompactTest represents a test in compact format (source_tests/ files)
 type CompactTest struct {
 	Name      string              `json:"name"`
-	Input     string              `json:"input"`
+	Inputs    []string            `json:"inputs"` // CCL input text(s) - single-input tests use 1-element array
 	Tests     []CompactValidation `json:"tests"`
 	Features  []string            `json:"features,omitempty"`
 	Behaviors []string            `json:"behaviors,omitempty"`
@@ -470,7 +470,7 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 
 		testCase := types.TestCase{
 			Name:      compact.Name,
-			Input:     compact.Input,
+			Inputs:    compact.Inputs,
 			Features:  features,
 			Behaviors: behaviors,
 			Variants:  variants,
@@ -512,10 +512,14 @@ func (tl *TestLoader) loadCompactFormat(data []byte) ([]types.TestCase, error) {
 				validations.PrettyPrint = validationValue
 			case "round_trip":
 				validations.RoundTrip = validationValue
-			case "associativity":
-				validations.Associativity = validationValue
 			case "canonical_format":
 				validations.Canonical = validationValue
+			case "compose_associative":
+				validations.ComposeAssociative = validationValue
+			case "identity_left":
+				validations.IdentityLeft = validationValue
+			case "identity_right":
+				validations.IdentityRight = validationValue
 			}
 		}
 
