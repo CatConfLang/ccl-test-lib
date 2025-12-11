@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tylerbu/ccl-test-lib/config"
-	"github.com/tylerbu/ccl-test-lib/generator"
-	"github.com/tylerbu/ccl-test-lib/loader"
-	"github.com/tylerbu/ccl-test-lib/types"
+	"github.com/CatConfLang/ccl-test-lib/config"
+	"github.com/CatConfLang/ccl-test-lib/generator"
+	"github.com/CatConfLang/ccl-test-lib/loader"
+	"github.com/CatConfLang/ccl-test-lib/types"
 )
 
 // Integration tests focusing on cross-package interactions

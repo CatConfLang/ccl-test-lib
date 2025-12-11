@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/tylerbu/ccl-test-lib/types/generated"
+	"github.com/CatConfLang/ccl-test-lib/types/generated"
 )
 
 // Convenient type aliases for the generated structs with better naming

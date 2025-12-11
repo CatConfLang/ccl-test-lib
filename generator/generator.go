@@ -10,10 +10,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/tylerbu/ccl-test-lib/config"
-	"github.com/tylerbu/ccl-test-lib/loader"
-	"github.com/tylerbu/ccl-test-lib/types"
-	"github.com/tylerbu/ccl-test-lib/types/generated"
+	"github.com/CatConfLang/ccl-test-lib/config"
+	"github.com/CatConfLang/ccl-test-lib/loader"
+	"github.com/CatConfLang/ccl-test-lib/types"
+	"github.com/CatConfLang/ccl-test-lib/types/generated"
 )
 
 // Export format constants for convenience

@@ -1,4 +1,4 @@
-module github.com/tylerbu/ccl-test-lib
+module github.com/CatConfLang/ccl-test-lib
 
 go 1.25.1
 

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tylerbu/ccl-test-lib/config"
-	"github.com/tylerbu/ccl-test-lib/types"
+	"github.com/CatConfLang/ccl-test-lib/config"
+	"github.com/CatConfLang/ccl-test-lib/types"
 )
 
 // Test data setup
