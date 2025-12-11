@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	ccl "github.com/tylerbu/ccl-test-lib"
-	"github.com/tylerbu/ccl-test-lib/config"
-	"github.com/tylerbu/ccl-test-lib/loader"
+	ccl "github.com/CatConfLang/ccl-test-lib"
+	"github.com/CatConfLang/ccl-test-lib/config"
+	"github.com/CatConfLang/ccl-test-lib/loader"
 )
 
 func main() {

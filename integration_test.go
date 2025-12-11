@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tylerbu/ccl-test-lib/config"
+	"github.com/CatConfLang/ccl-test-lib/config"
 )
 
 // Integration tests that work with real CCL test data structure
