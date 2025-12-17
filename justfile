@@ -1,15 +1,16 @@
 # CCL Test Library Justfile
 
-# Show available commands
-default:
-    @just --list
-
 # Core aliases
 alias t := test
 alias b := build
 alias l := lint
 alias f := format
 alias c := clean
+alias pr := ci
+
+# Show available commands
+default:
+    @just --list
 
 # === BUILD ===
 
@@ -84,12 +85,7 @@ format:
 
 # Check if code is formatted
 format-check:
-    #!/usr/bin/env bash
-    if [ -n "$(gofmt -l .)" ]; then
-        echo "Code is not formatted. Run 'just format' to fix."
-        gofmt -l .
-        exit 1
-    fi
+    gofmt -l .
 
 # Lint code
 lint:
@@ -151,14 +147,13 @@ deps-update:
 docs:
     godoc -http=:6060
 
-# Show package documentation
-docs-show PACKAGE="":
-    #!/usr/bin/env bash
-    if [ -z "{{PACKAGE}}" ]; then
-        go doc github.com/tylerbu/ccl-test-lib
-    else
-        go doc github.com/tylerbu/ccl-test-lib/{{PACKAGE}}
-    fi
+# Show package documentation for root
+docs-show:
+    go doc github.com/tylerbu/ccl-test-lib
+
+# Show package documentation for specific package
+docs-pkg PACKAGE:
+    go doc github.com/tylerbu/ccl-test-lib/{{PACKAGE}}
 
 # === RELEASE ===
 
@@ -182,18 +177,30 @@ tag VERSION:
 
 # === PROJECT HEALTH ===
 
+# Show lines of code statistics
+_stats-loc:
+    @echo "=== Lines of Code ==="
+    @find . -name "*.go" -not -path "./vendor/*" -exec wc -l {} +
+
+# Show package count
+_stats-packages:
+    @echo "=== Package Count ==="
+    @go list ./...
+
+# Show test coverage
+_stats-coverage:
+    @echo "=== Test Coverage ==="
+    @go test -cover ./...
+
 # Show project statistics
 stats:
-    @echo "=== Lines of Code ==="
-    find . -name "*.go" -not -path "./vendor/*" | xargs wc -l | tail -1
-    @echo "=== Package Count ==="
-    go list ./... | wc -l
-    @echo "=== Test Coverage ==="
-    go test -cover ./... | grep coverage
+    just _stats-loc
+    just _stats-packages
+    just _stats-coverage
 
-# Security scan
+# Security scan (requires nancy tool)
 security:
-    go list -json -m all | nancy sleuth
+    nancy sleuth
 
 # Performance profile
 profile:
