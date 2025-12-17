@@ -137,8 +137,8 @@
               "enum": [
                 "boolean_strict", "boolean_lenient",
                 "crlf_preserve_literal", "crlf_normalize_to_lf",
-                "tabs_preserve", "tabs_to_spaces",
-                "strict_spacing", "loose_spacing",
+                "tabs_as_content", "tabs_as_whitespace",
+                "indent_spaces", "indent_tabs",
                 "list_coercion_enabled", "list_coercion_disabled",
                 "array_order_insertion", "array_order_lexicographic"
               ]
