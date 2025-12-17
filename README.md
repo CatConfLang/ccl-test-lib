@@ -1,5 +1,17 @@
 # CCL Test Library
 
+> **⚠️ DEPRECATED:** This repository has been consolidated into [ccl-test-data](https://github.com/tylerbutler/ccl-test-data).
+>
+> **Migration:** Update your imports from:
+> - `github.com/CatConfLang/ccl-test-lib` → `github.com/tylerbutler/ccl-test-data`
+> - `github.com/CatConfLang/ccl-test-lib/config` → `github.com/tylerbutler/ccl-test-data/config`
+> - `github.com/CatConfLang/ccl-test-lib/loader` → `github.com/tylerbutler/ccl-test-data/loader`
+> - `github.com/CatConfLang/ccl-test-lib/types` → `github.com/tylerbutler/ccl-test-data/types`
+>
+> The packages are now available in `ccl-test-data/` with identical APIs.
+
+---
+
 Shared Go module for CCL test loading infrastructure, providing modern dual-format test suite support with type-safe filtering.
 
 ## Overview
