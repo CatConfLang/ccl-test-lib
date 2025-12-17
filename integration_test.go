@@ -473,8 +473,8 @@ func TestIntegration_LargeConfigurationSpaces(t *testing.T) {
 		SupportedFeatures:  config.AllFeatures(),
 		BehaviorChoices: []config.CCLBehavior{
 			config.BehaviorCRLFNormalize,
-			config.BehaviorTabsPreserve,
-			config.BehaviorStrictSpacing,
+			config.BehaviorTabsAsContent,
+			config.BehaviorIndentSpaces,
 			config.BehaviorBooleanStrict,
 			config.BehaviorListCoercionOn,
 		},

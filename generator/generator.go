@@ -603,12 +603,12 @@ var behaviorFunctionMap = map[string][]string{
 	"crlf_normalize_to_lf":  {"parse", "parse_indented", "canonical_format", "load"},
 
 	// Tab handling affects parsing, formatting, and hierarchy building functions
-	"tabs_preserve":  {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
-	"tabs_to_spaces": {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+	"tabs_as_content":    {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
+	"tabs_as_whitespace": {"parse", "parse_indented", "canonical_format", "load", "build_hierarchy"},
 
-	// Spacing behavior affects parsing
-	"strict_spacing": {"parse", "parse_indented"},
-	"loose_spacing":  {"parse", "parse_indented"},
+	// Indent output affects formatting functions
+	"indent_spaces": {"canonical_format", "print", "round_trip"},
+	"indent_tabs":   {"canonical_format", "print", "round_trip"},
 
 	// Array ordering affects hierarchy building and list access
 	"array_order_insertion":     {"build_hierarchy", "get_list"},

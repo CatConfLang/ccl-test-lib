@@ -55,7 +55,7 @@ func main() {
 		SupportedFeatures:  config.AllFeatures(),  // All features for full coverage
 		BehaviorChoices: []config.CCLBehavior{
 			config.BehaviorCRLFNormalize,
-			config.BehaviorTabsPreserve,
+			config.BehaviorTabsAsContent,
 			config.BehaviorBooleanLenient,
 		},
 		VariantChoice: config.VariantProposed,

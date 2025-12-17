@@ -31,7 +31,7 @@ func main() {
 		},
 		BehaviorChoices: []config.CCLBehavior{
 			config.BehaviorCRLFNormalize,
-			config.BehaviorTabsPreserve,
+			config.BehaviorTabsAsContent,
 			config.BehaviorBooleanLenient,
 		},
 		VariantChoice: config.VariantProposed,
